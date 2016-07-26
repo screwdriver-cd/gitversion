@@ -1,0 +1,24 @@
+box: google/golang
+
+build:
+  steps:
+    - script:
+      name: go test
+      code: go test ./...
+
+    - script:
+      name: go build
+      code: go build gitversion.go
+
+deploy:
+  steps:
+    - script:
+        name: get version from VERSION file
+        code: export VERSION=$(cat VERSION)
+    - github-create-release:
+        token: $GITHUB_TOKEN
+        tag: v$VERSION
+    - github-upload-asset:
+        token: $GITHUB_TOKEN
+        file: launch
+        content_type: application/octet-stream
