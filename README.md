@@ -9,6 +9,31 @@
 gitversion --prefix v bump patch
 ```
 
+Only [semver](http://semver.org/)-style versions with optional prefix are
+supported at this time (major.minor.patch).
+
+`gitversion` will filter all tags of the format
+`<prefix><major>.<minor>.<patch>`, sort them, and increment the requested
+field (patch in this example) on the largest version. It then tags the
+current revision with the result.
+
+### e.g.
+
+```bash
+> git tag
+v1.2.3
+v1.2.4
+
+> gitversion --prefix v bump patch
+Bumping patch for version 1.2.4
+1.2.5
+
+> git tag
+v1.2.3
+v1.2.4
+v1.2.5
+```
+
 ## Testing
 
 ```bash
