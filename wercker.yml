@@ -22,13 +22,36 @@ build:
 
 deploy:
   steps:
+    # Add our deploy key to SSH
+    - add-ssh-key:
+      keyname: GIT_KEY
+
+    - install-packages:
+        packages: openssh-client
+
+    # Add GitHub's SSH fingerprint to SSH known_hosts
+    - add-to-known_hosts:
+      hostname: github.com
+      fingerprint: 16:27:ac:a5:76:28:2d:36:63:1b:56:4d:eb:df:a6:48
+      type: rsa
+
     - script:
-        name: get version from VERSION file
-        code: export VERSION=$(cat VERSION)
+        name: get highest version from tags
+        code: export VERSION=v1.0.0
+
+    - script:
+        name: add new tag
+        code: git tag $VERSION
+
+    - script:
+        name: push newly added tag
+        code: git push origin $VERSION
+
     - github-create-release:
         token: $GITHUB_TOKEN
-        tag: v$VERSION
+        tag: $VERSION
+
     - github-upload-asset:
         token: $GITHUB_TOKEN
-        file: launch
+        file: gitversion
         content_type: application/octet-stream
