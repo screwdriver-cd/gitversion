@@ -2,6 +2,11 @@ box: golang
 
 build:
   steps:
+    # Store the original source dir so we can pass the file to deploy
+    - script:
+      name: provide chance for deployment
+      code: |
+        export ORG_SOURCE=$WERCKER_SOURCE_DIR
     - wercker/setup-go-workspace:
       package-dir: github.com/screwdriver-cd/gitversion
     - script:
@@ -15,6 +20,7 @@ build:
       name: go build
       code: |
         go build -a -o gitversion
+        mv gitversion $ORG_SOURCE
     - script:
         name: go test
         code: |
