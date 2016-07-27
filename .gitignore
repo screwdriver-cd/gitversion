@@ -1,3 +1,5 @@
 artifacts/
 .DS_STORE
 .*.swp
+gitversion
+.wercker/

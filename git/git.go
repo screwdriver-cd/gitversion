@@ -1,9 +1,9 @@
 package git
 
 import (
-	"bufio"
 	"fmt"
 	"os/exec"
+	"strings"
 )
 
 var execCommand = exec.Command
@@ -11,30 +11,13 @@ var execCommand = exec.Command
 // Tags returns the list of git tags as a string slice
 func Tags() ([]string, error) {
 	cmd := execCommand("git", "tag")
-	outReader, err := cmd.StdoutPipe()
+	out, err := cmd.Output()
 	if err != nil {
 		return nil, fmt.Errorf("fetching git tags: %v", err)
 	}
 
-	var lines []string
-	scanner := bufio.NewScanner(outReader)
-	go func() {
-		for scanner.Scan() {
-			line := scanner.Text()
-			lines = append(lines, line)
-		}
-	}()
-
-	err = cmd.Start()
-	if err != nil {
-		return nil, fmt.Errorf("starting git command: %v", err)
-	}
-
-	err = cmd.Wait()
-	if err != nil {
-		return nil, fmt.Errorf("waiting for git command: %v", err)
-	}
-
+	trimmed := strings.TrimSpace(string(out))
+	lines := strings.Split(trimmed, "\n")
 	return lines, nil
 }
 

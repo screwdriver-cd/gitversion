@@ -76,7 +76,15 @@ func TestHelperProcess(*testing.T) {
 	}
 	defer os.Exit(0)
 
-	args := os.Args[3:] // Should become something lke ["git", "tag"]
+	args := os.Args[:]
+	for i, val := range os.Args { // Should become something lke ["git", "tag"]
+		args = os.Args[i:]
+		if val == "--" {
+			args = args[1:]
+			break
+		}
+	}
+
 	if len(args) >= 2 && args[0] == "git" && args[1] == "tag" {
 		if len(args) == 2 {
 			tags := []string{

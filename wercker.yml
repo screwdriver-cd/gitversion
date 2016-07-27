@@ -1,14 +1,24 @@
-box: google/golang
+box: golang
 
 build:
   steps:
+    - wercker/setup-go-workspace:
+      package-dir: github.com/screwdriver-cd/gitversion
     - script:
-      name: go test
-      code: go test ./...
-
+      name: go get
+      code: |
+        cd $WERCKER_SOURCE_DIR
+        go version
+        go get -t ./...
+    - wercker/golint
     - script:
       name: go build
-      code: go build gitversion.go
+      code: |
+        go build -a -o gitversion
+    - script:
+        name: go test
+        code: |
+          go test ./...
 
 deploy:
   steps:
