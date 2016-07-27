@@ -36,12 +36,14 @@ deploy:
       type: rsa
 
     - script:
-        name: get highest version from tags
-        code: export VERSION=v1.0.0
+        name: install gitversion
+        code: |
+            wget https://github.com/Screwdriver-CD/gitversion/releases/download/v1.0.0/gitversion
+            chmod +x gitversion
 
     - script:
-        name: add new tag
-        code: git tag $VERSION
+        name: bump the patch version
+        code: ./gitversion --prefix v bump patch
 
     - script:
         name: push newly added tag
