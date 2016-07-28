@@ -7,20 +7,37 @@ build:
       name: provide chance for deployment
       code: |
         export ORG_SOURCE=$WERCKER_SOURCE_DIR
+
     - wercker/setup-go-workspace:
       package-dir: github.com/screwdriver-cd/gitversion
+
     - script:
       name: go get
       code: |
         cd $WERCKER_SOURCE_DIR
         go version
         go get -t ./...
+
     - wercker/golint
+
+    - script:
+        name: install gitversion
+        code: |
+            wget https://github.com/Screwdriver-CD/gitversion/releases/download/v1.0.0/gitversion
+            chmod +x gitversion
+
+    # Fake bump to get the new tag -- never pushed
+    - script:
+        name: bump the patch version
+        code: export VERSION=$(./gitversion --prefix v bump patch)
+
     - script:
       name: go build
       code: |
-        go build -a -o gitversion
+        go build -a -o gitversion -ldflags "-X main.VERSION=$VERSION"
+        ./gitversion --version
         mv gitversion $ORG_SOURCE
+
     - script:
         name: go test
         code: |
@@ -49,7 +66,7 @@ deploy:
 
     - script:
         name: bump the patch version
-        code: ./gitversion --prefix v bump patch
+        code: export VERSION=$(./gitversion --prefix v bump patch)
 
     - script:
         name: push newly added tag
