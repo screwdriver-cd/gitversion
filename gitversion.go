@@ -2,12 +2,16 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"sort"
+
 	"github.com/screwdriver-cd/gitversion/git"
 	"github.com/screwdriver-cd/gitversion/version"
 	"github.com/urfave/cli"
-	"os"
-	"sort"
 )
+
+// VERSION gets set by the build script via the LDFLAGS
+var VERSION string
 
 func bumpPatch(prefix string) error {
 	v, err := latestVersion(prefix)
@@ -68,6 +72,10 @@ func main() {
 	app := cli.NewApp()
 	app.Name = "gitversion"
 	app.Usage = "manage versions using git tags."
+	if VERSION == "" {
+		VERSION = "0.0.0"
+	}
+	app.Version = VERSION
 
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
