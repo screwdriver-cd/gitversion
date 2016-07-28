@@ -1,8 +1,9 @@
 package main
 
 import (
-	"github.com/screwdriver-cd/gitversion/git"
 	"testing"
+
+	"github.com/screwdriver-cd/gitversion/git"
 )
 
 func fakeGitTags() ([]string, error) {
@@ -90,7 +91,7 @@ func TestBumpPatch(t *testing.T) {
 	}
 	defer func() { gitTags = git.Tags }()
 
-	bumpPatch("")
+	BumpPatch("")
 }
 
 func TestPrefix(t *testing.T) {
@@ -111,4 +112,15 @@ func TestPrefix(t *testing.T) {
 	if latest.String() != expected {
 		t.Errorf("latestVersion() = %v, want %v", latest, expected)
 	}
+}
+
+func ExampleBumpPatch() {
+	gitTags = func() ([]string, error) {
+		return []string{
+			"v2.2.0",
+		}, nil
+	}
+
+	BumpPatch("v")
+	// Output: v2.2.1
 }
