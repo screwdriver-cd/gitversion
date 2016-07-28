@@ -20,16 +20,10 @@ build:
 
     - wercker/golint
 
-    - script:
-        name: install gitversion
-        code: |
-            wget https://github.com/Screwdriver-CD/gitversion/releases/download/v1.0.0/gitversion
-            chmod +x gitversion
-
     # Fake bump to get the new tag -- never pushed
     - script:
         name: bump the patch version
-        code: export VERSION=$(./gitversion --prefix v bump patch)
+        code: export VERSION=$(go run gitversion.go --prefix v bump patch)
 
     - script:
       name: go build
@@ -59,14 +53,8 @@ deploy:
       type: rsa
 
     - script:
-        name: install gitversion
-        code: |
-            wget https://github.com/Screwdriver-CD/gitversion/releases/download/v1.0.0/gitversion
-            chmod +x gitversion
-
-    - script:
         name: bump the patch version
-        code: export VERSION=v$(./gitversion --prefix v bump patch)
+        code: export VERSION=$(./gitversion --prefix v bump patch)
 
     - script:
         name: push newly added tag
