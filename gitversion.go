@@ -13,7 +13,8 @@ import (
 // VERSION gets set by the build script via the LDFLAGS
 var VERSION string
 
-func bumpPatch(prefix string) error {
+// BumpPatch increments the Patch field of the latest version
+func BumpPatch(prefix string) error {
 	v, err := latestVersion(prefix)
 	if err != nil {
 		return fmt.Errorf("bumping patch version %v: %v", v, err)
@@ -24,7 +25,7 @@ func bumpPatch(prefix string) error {
 	if err = gitTag(fmt.Sprintf("%v%v", prefix, v.String())); err != nil {
 		return fmt.Errorf("creating new tag %v", v)
 	}
-	fmt.Println(v)
+	fmt.Fprintf(os.Stdout, "%s%s\n", prefix, v)
 	return nil
 }
 
@@ -95,7 +96,7 @@ func main() {
 					Name:  "patch",
 					Usage: "bump the patch version",
 					Action: func(c *cli.Context) error {
-						if err := bumpPatch(prefix); err != nil {
+						if err := BumpPatch(prefix); err != nil {
 							fmt.Fprintf(os.Stderr, "Error: %v", err)
 							return err
 						}
