@@ -8,6 +8,8 @@ import (
 	"github.com/screwdriver-cd/gitversion/git"
 	"github.com/screwdriver-cd/gitversion/version"
 	"github.com/urfave/cli"
+	"errors"
+	"strings"
 )
 
 // VERSION gets set by the build script via the LDFLAGS
@@ -17,7 +19,13 @@ var VERSION string
 func BumpPatch(prefix string) error {
 	v, err := latestVersion(prefix)
 	if err != nil {
-		return fmt.Errorf("bumping patch version %v: %v", v, err)
+		if err == errNoVersionTags {
+			s := err.Error()
+			s = fmt.Sprintf("%s%s", strings.ToUpper(string(s[0])), s[1:])
+			fmt.Fprintf(os.Stderr, "WARNING: %v. Using %v\n", s, v)
+		} else {
+			return fmt.Errorf("bumping patch version %v: %v", v, err)
+		}
 	}
 
 	fmt.Fprintf(os.Stderr, "Bumping patch for version %v\n", v)
@@ -31,6 +39,7 @@ func BumpPatch(prefix string) error {
 
 var gitTags = git.Tags
 var gitTag = git.Tag
+var errNoVersionTags = errors.New("no valid version tags found")
 
 func latestVersion(prefix string) (v version.Version, err error) {
 	versions, err := versions(prefix)
@@ -62,7 +71,7 @@ func versions(prefix string) (version.List, error) {
 	}
 
 	if len(versions) == 0 {
-		return nil, fmt.Errorf("no valid version tags found")
+		return nil, errNoVersionTags
 	}
 	return versions, nil
 }

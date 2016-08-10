@@ -94,6 +94,23 @@ func TestBumpPatch(t *testing.T) {
 	BumpPatch("")
 }
 
+func TestBumpPatchWithNoVersions(t *testing.T) {
+	expected := "0.0.1"
+	gitTag = func(tag string) error {
+		if tag != expected {
+			t.Errorf("git.Tag() called with %v, want %v", tag, expected)
+		}
+		return nil
+	}
+
+	gitTags = func() ([]string, error) {
+		return []string{}, nil
+	}
+	defer func() { gitTags = git.Tags }()
+
+	BumpPatch("")
+}
+
 func TestPrefix(t *testing.T) {
 	expected := "2.1.0"
 	gitTags = func() ([]string, error) {
