@@ -85,6 +85,7 @@ func TestBumpPatch(t *testing.T) {
 		}
 		return nil
 	}
+	defer func() { gitTag = git.Tag }()
 
 	gitTags = func() ([]string, error) {
 		return []string{"1.1.1", "0.1.1"}, nil
@@ -102,6 +103,7 @@ func TestBumpPatchWithNoVersions(t *testing.T) {
 		}
 		return nil
 	}
+	defer func() { gitTag = git.Tag }()
 
 	gitTags = func() ([]string, error) {
 		return []string{}, nil
@@ -120,6 +122,7 @@ func TestPrefix(t *testing.T) {
 			"2.3.0",
 		}, nil
 	}
+	defer func() { gitTags = git.Tags }()
 
 	latest, err := latestVersion("bigPrefix")
 	if err != nil {
@@ -132,11 +135,18 @@ func TestPrefix(t *testing.T) {
 }
 
 func ExampleBumpPatch() {
+	gitTag = func(tag string) error {
+		return nil
+	}
+
+	defer func() { gitTag = git.Tag }()
+
 	gitTags = func() ([]string, error) {
 		return []string{
 			"v2.2.0",
 		}, nil
 	}
+	defer func() { gitTags = git.Tags }()
 
 	BumpPatch("v")
 	// Output: v2.2.1
