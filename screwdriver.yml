@@ -1,0 +1,11 @@
+jobs:
+  main:
+    image: golang
+    steps:
+      - get: go get -t ./...
+      - vet: go vet ./...
+      - gofmt: "find . -name '*.go' | xargs gofmt -s -w"
+      - test: go test ./...
+      - build: go build -a -o gitversion
+    environment:
+      GOPATH: /sd/workspace
