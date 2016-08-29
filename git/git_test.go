@@ -52,6 +52,57 @@ func TestTags(t *testing.T) {
 	}
 }
 
+func TestLastCommit(t *testing.T) {
+	expected := "9d8ceaaa28f0563e52e1edf3eaae72c814aa1102"
+
+	execCommand = fakeExecCommand
+	defer func() { execCommand = exec.Command }()
+
+	commit, err := LastCommit()
+
+	if err != nil {
+		t.Errorf("LastCommit() error = %q, should be nil", err)
+	}
+
+	if expected != commit {
+		t.Errorf("LastCommit() = %v, want %v", commit, expected)
+	}
+}
+
+func TestLastMessage(t *testing.T) {
+	expected := "minor: this should be bumping minor"
+
+	execCommand = fakeExecCommand
+	defer func() { execCommand = exec.Command }()
+
+	commit, err := LastCommitMessage()
+
+	if err != nil {
+		t.Errorf("LastCommitMessage() error = %q, should be nil", err)
+	}
+
+	if expected != commit {
+		t.Errorf("LastCommitMessage() = %v, want %v", commit, expected)
+	}
+}
+
+func TestTagged(t *testing.T) {
+	expected := true
+
+	execCommand = fakeExecCommand
+	defer func() { execCommand = exec.Command }()
+
+	commit, err := Tagged()
+
+	if err != nil {
+		t.Errorf("Tagged() error = %q, should be nil", err)
+	}
+
+	if expected != commit {
+		t.Errorf("Tagged() = %v, want %v", commit, expected)
+	}
+}
+
 func TestTag(t *testing.T) {
 	execCommand = getFakeExecCommand(func(cmd string, args ...string) {
 		if len(args) != 2 {
@@ -85,25 +136,43 @@ func TestHelperProcess(*testing.T) {
 		}
 	}
 
-	if len(args) >= 2 && args[0] == "git" && args[1] == "tag" {
-		if len(args) == 2 {
-			tags := []string{
-				"v1.0.1",
-				"v2.0.1",
-				"v1.2.1",
-				"v1.4.3",
+	if len(args) >= 2 && args[0] == "git" {
+		switch args[1] {
+		default:
+			os.Exit(255)
+		case "tag":
+			if len(args) == 2 {
+				tags := []string{
+					"v1.0.1",
+					"v2.0.1",
+					"v1.2.1",
+					"v1.4.3",
+				}
+				for _, tag := range tags {
+					fmt.Println(tag)
+				}
+				return
 			}
-			for _, tag := range tags {
-				fmt.Println(tag)
+
+			// git tag v1.0.0
+			if len(args) == 3 {
+				return
 			}
+
+			// git tag --contains foo
+			if len(args) == 4 {
+				fmt.Println("v1.0.5")
+				return
+			}
+
+			os.Exit(255)
+		case "log":
+			fmt.Println("minor: this should be bumping minor")
+			return
+		case "rev-parse":
+			fmt.Println("9d8ceaaa28f0563e52e1edf3eaae72c814aa1102")
 			return
 		}
-
-		if len(args) == 3 {
-			return
-		}
-
-		os.Exit(255)
 	}
 
 	os.Exit(255)

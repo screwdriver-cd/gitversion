@@ -77,6 +77,113 @@ func TestLatestVersion(t *testing.T) {
 	}
 }
 
+func TestBumpAutoTagged(t *testing.T) {
+	expected := "1.1.2"
+	gitTag = func(tag string) error {
+		if tag != expected {
+			t.Errorf("git.Tag() called with %v, want %v", tag, expected)
+		}
+		return nil
+	}
+	defer func() { gitTag = git.Tag }()
+
+	gitTags = func() ([]string, error) {
+		return []string{"1.1.1", "0.1.1"}, nil
+	}
+	defer func() { gitTags = git.Tags }()
+
+	gitTagged = func() (bool, error) {
+		return true, nil
+	}
+	defer func() { gitTagged = git.Tagged }()
+
+	Bump("", Auto)
+}
+
+func TestBumpAutoMatch(t *testing.T) {
+	expected := "2.0.0"
+	gitTag = func(tag string) error {
+		if tag != expected {
+			t.Errorf("git.Tag() called with %v, want %v", tag, expected)
+		}
+		return nil
+	}
+	defer func() { gitTag = git.Tag }()
+
+	gitTags = func() ([]string, error) {
+		return []string{"1.1.1", "0.1.1"}, nil
+	}
+	defer func() { gitTags = git.Tags }()
+
+	gitTagged = func() (bool, error) {
+		return false, nil
+	}
+	defer func() { gitTagged = git.Tagged }()
+
+	gitMessage = func() (string, error) {
+		return "[Major] foo", nil
+	}
+	defer func() { gitMessage = git.LastCommitMessage }()
+
+	Bump("", Auto)
+}
+
+func TestBumpAutoMatchAlternate(t *testing.T) {
+	expected := "2.0.0"
+	gitTag = func(tag string) error {
+		if tag != expected {
+			t.Errorf("git.Tag() called with %v, want %v", tag, expected)
+		}
+		return nil
+	}
+	defer func() { gitTag = git.Tag }()
+
+	gitTags = func() ([]string, error) {
+		return []string{"1.1.1", "0.1.1"}, nil
+	}
+	defer func() { gitTags = git.Tags }()
+
+	gitTagged = func() (bool, error) {
+		return false, nil
+	}
+	defer func() { gitTagged = git.Tagged }()
+
+	gitMessage = func() (string, error) {
+		return "[major bump] foo", nil
+	}
+	defer func() { gitMessage = git.LastCommitMessage }()
+
+	Bump("", Auto)
+}
+
+func TestBumpAutoMatchFallback(t *testing.T) {
+	expected := "1.1.2"
+	gitTag = func(tag string) error {
+		if tag != expected {
+			t.Errorf("git.Tag() called with %v, want %v", tag, expected)
+		}
+		return nil
+	}
+	defer func() { gitTag = git.Tag }()
+
+	gitTags = func() ([]string, error) {
+		return []string{"1.1.1", "0.1.1"}, nil
+	}
+	defer func() { gitTags = git.Tags }()
+
+	gitTagged = func() (bool, error) {
+		return false, nil
+	}
+	defer func() { gitTagged = git.Tagged }()
+
+	gitMessage = func() (string, error) {
+		return "foo bar", nil
+	}
+	defer func() { gitMessage = git.LastCommitMessage }()
+
+	Bump("", Auto)
+}
+
 func TestBumpPatch(t *testing.T) {
 	expected := "1.1.2"
 	gitTag = func(tag string) error {
@@ -92,10 +199,46 @@ func TestBumpPatch(t *testing.T) {
 	}
 	defer func() { gitTags = git.Tags }()
 
-	BumpPatch("")
+	Bump("", Patch)
 }
 
-func TestBumpPatchWithNoVersions(t *testing.T) {
+func TestBumpMinor(t *testing.T) {
+	expected := "1.2.0"
+	gitTag = func(tag string) error {
+		if tag != expected {
+			t.Errorf("git.Tag() called with %v, want %v", tag, expected)
+		}
+		return nil
+	}
+	defer func() { gitTag = git.Tag }()
+
+	gitTags = func() ([]string, error) {
+		return []string{"1.1.1", "0.1.1"}, nil
+	}
+	defer func() { gitTags = git.Tags }()
+
+	Bump("", Minor)
+}
+
+func TestBumpMajor(t *testing.T) {
+	expected := "2.0.0"
+	gitTag = func(tag string) error {
+		if tag != expected {
+			t.Errorf("git.Tag() called with %v, want %v", tag, expected)
+		}
+		return nil
+	}
+	defer func() { gitTag = git.Tag }()
+
+	gitTags = func() ([]string, error) {
+		return []string{"1.1.1", "0.1.1"}, nil
+	}
+	defer func() { gitTags = git.Tags }()
+
+	Bump("", Major)
+}
+
+func TestBumpWithNoVersions(t *testing.T) {
 	expected := "0.0.1"
 	gitTag = func(tag string) error {
 		if tag != expected {
@@ -110,7 +253,28 @@ func TestBumpPatchWithNoVersions(t *testing.T) {
 	}
 	defer func() { gitTags = git.Tags }()
 
-	BumpPatch("")
+	Bump("", Patch)
+}
+
+func TestBumpWithBadField(t *testing.T) {
+	expected := "0.0.1"
+	gitTag = func(tag string) error {
+		if tag != expected {
+			t.Errorf("git.Tag() called with %v, want %v", tag, expected)
+		}
+		return nil
+	}
+	defer func() { gitTag = git.Tag }()
+
+	gitTags = func() ([]string, error) {
+		return []string{}, nil
+	}
+	defer func() { gitTags = git.Tags }()
+
+	err := Bump("", "foobar")
+	if err == nil {
+		t.Error("expected error from Bump()")
+	}
 }
 
 func TestPrefix(t *testing.T) {
@@ -134,7 +298,7 @@ func TestPrefix(t *testing.T) {
 	}
 }
 
-func ExampleBumpPatch() {
+func ExampleBump() {
 	gitTag = func(tag string) error {
 		return nil
 	}
@@ -148,6 +312,6 @@ func ExampleBumpPatch() {
 	}
 	defer func() { gitTags = git.Tags }()
 
-	BumpPatch("v")
+	Bump("v", Patch)
 	// Output: v2.2.1
 }
