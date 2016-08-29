@@ -31,3 +31,41 @@ func Tag(tag string) error {
 
 	return nil
 }
+
+// LastCommit gets the last commit SHA
+func LastCommit() (string, error) {
+	cmd := execCommand("git", "rev-parse", "HEAD")
+	out, err := cmd.Output()
+	if err != nil {
+		return "", fmt.Errorf("fetching git commit: %v", err)
+	}
+
+	trimmed := strings.TrimSpace(string(out))
+	return trimmed, nil
+}
+
+// LastCommitMessage gets the last commit message
+func LastCommitMessage() (string, error) {
+	cmd := execCommand("git", "log", "-1", "--pretty=%B")
+	out, err := cmd.Output()
+	if err != nil {
+		return "", fmt.Errorf("fetching git commit message: %v", err)
+	}
+
+	trimmed := strings.TrimSpace(string(out))
+	return trimmed, nil
+}
+
+// Tagged returns true if the specified commit has been tagged
+func Tagged() (bool, error) {
+	commit, err := LastCommit()
+	if err != nil {
+		return false, fmt.Errorf("checking current tag: %v", err)
+	}
+	cmd := execCommand("git", "tag", "--contains", commit)
+	t, err := cmd.Output()
+	if err != nil {
+		return false, nil
+	}
+	return len(string(t)) > 0, nil
+}

@@ -32,7 +32,34 @@ Bumping patch for version 1.2.4
 v1.2.3
 v1.2.4
 v1.2.5
+
+> gitversion --prefix v show
+v1.2.5
 ```
+
+### Auto
+
+Auto is a special field that will determine the proper field to bump
+based on the contents of the last commit message.  It looks for anything matching:
+
+> [major] or [major bump]
+>
+> [minor] or [minor bump]
+
+Example:
+```bash
+> git tag
+1.2.3
+1.2.4
+
+> git log -1
+[minor] Added show, major, minor, and auto features
+
+> gitversion bump auto
+1.3.0
+```
+
+And will default to patch if none found or if the commit is already tagged.
 
 ## Testing
 
