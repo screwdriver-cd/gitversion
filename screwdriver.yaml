@@ -1,11 +1,33 @@
-jobs:
-  main:
+workflow:
+    - deploy
+
+shared:
     image: golang
-    steps:
-      - get: go get -t ./...
-      - vet: go vet ./...
-      - gofmt: "find . -name '*.go' | xargs gofmt -s -w"
-      - test: go test ./...
-      - build: go build -a -o gitversion
     environment:
-      GOPATH: /sd/workspace
+        GOPATH: /sd/workspace
+
+jobs:
+    main:
+        steps:
+            - get: go get -t ./...
+            - vet: go vet ./...
+            - gofmt: "find . -name '*.go' | xargs gofmt -s -w"
+            - test: go test ./...
+            - build: go build -a -o gitversion
+
+    deploy:
+        steps:
+            - setup-ci: git clone https://gist.github.com/3d2388b2a7ba658cdcdaffa8cd874e50.git ci
+            - get: go get -t ./...
+            - gofmt: "find . -name '*.go' | xargs gofmt -s -w"
+            - build: go build -a -o gitversion
+            - get-bzip2: apt-get update && apt-get install -y --no-install-recommends bzip2
+            - tag: ./ci/git-tag.sh
+            - release: ./ci/git-release.sh
+        secrets:
+            # Pushing tags to Git
+            - GIT_KEY
+            # Pushing releases to GitHub
+            - GITHUB_TOKEN
+        environment:
+            RELEASE_FILE: gitversion
