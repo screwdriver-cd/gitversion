@@ -73,5 +73,5 @@ Code licensed under the BSD 3-Clause license. See LICENSE file for terms.
 
 [issues-image]: https://img.shields.io/github/issues/screwdriver-cd/gitversion.svg
 [issues-url]: https://github.com/screwdriver-cd/gitversion/issues
-[status-image]: https://cd.screwdriver.cd/pipelines/a5dd3581ad1495d758a55abbb8ba6a1349a1e6ed/badge
-[status-url]: https://cd.screwdriver.cd/pipelines/a5dd3581ad1495d758a55abbb8ba6a1349a1e6ed
+[status-image]: https://cd.screwdriver.cd/pipelines/e7c62e9cf91ef3e46655db878399168f529df941/badge
+[status-url]: https://cd.screwdriver.cd/pipelines/e7c62e9cf91ef3e46655db878399168f529df941
