@@ -71,7 +71,7 @@ go test ./...
 
 Code licensed under the BSD 3-Clause license. See LICENSE file for terms.
 
-[issues-image]: https://img.shields.io/github/issues/screwdriver-cd/gitversion.svg
-[issues-url]: https://github.com/screwdriver-cd/gitversion/issues
-[status-image]: https://cd.screwdriver.cd/pipelines/09318bcd83fa88e5251a3b615a2dfb0d2fbcb173/badge
-[status-url]: https://cd.screwdriver.cd/pipelines/09318bcd83fa88e5251a3b615a2dfb0d2fbcb173
+[issues-image]: https://img.shields.io/github/issues/screwdriver-cd/screwdriver.svg
+[issues-url]: https://github.com/screwdriver-cd/screwdriver/issues
+[status-image]: https://cd.screwdriver.cd/pipelines/16/badge
+[status-url]: https://cd.screwdriver.cd/pipelines/16
