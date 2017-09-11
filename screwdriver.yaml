@@ -17,7 +17,7 @@ jobs:
 
     deploy:
         steps:
-            - setup-ci: git clone https://gist.github.com/3d2388b2a7ba658cdcdaffa8cd874e50.git ci
+            - setup-ci: git clone https://github.com/screwdriver-cd/toolbox.git ci
             - get: go get -t ./...
             - gofmt: "find . -name '*.go' | xargs gofmt -s -w"
             - build: go build -a -o gitversion
