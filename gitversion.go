@@ -27,8 +27,13 @@ const (
 	MatchField = 1
 )
 
-// VERSION gets set by the build script via the LDFLAGS
-var VERSION string
+// These variables get set by the build script via the LDFLAGS
+// Detail about these variables are here: https://goreleaser.com/#builds
+var (
+	VERSION = "dev"
+	COMMIT  = "none"
+	DATE    = "unknown"
+)
 
 // Bump increments the specified field of the latest version
 func Bump(prefix string, field string) error {
@@ -132,10 +137,7 @@ func main() {
 	app := cli.NewApp()
 	app.Name = "gitversion"
 	app.Usage = "manage versions using git tags."
-	if VERSION == "" {
-		VERSION = "0.0.0"
-	}
-	app.Version = VERSION
+	app.Version = fmt.Sprintf("%v, commit %v, built at %v", VERSION, COMMIT, DATE)
 
 	app.Flags = []cli.Flag{
 		cli.StringFlag{

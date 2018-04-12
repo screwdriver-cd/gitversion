@@ -9,25 +9,24 @@ shared:
 jobs:
     main:
         steps:
+            - path: export PATH=$PATH:$GOPATH/bin
             - get: go get -t ./...
             - vet: go vet ./...
             - gofmt: "find . -name '*.go' | xargs gofmt -s -w"
             - test: go test ./...
-            - build: go build -a -o gitversion
-
+            # Ensure we can compile
+            - build: go build -a -o /dev/null
+            # Test cross-compiling as well
+            - test-release: "curl -sL https://git.io/goreleaser | bash -s -- --snapshot"
     deploy:
         steps:
+            - path: export PATH=$PATH:$GOPATH/bin
             - setup-ci: git clone https://github.com/screwdriver-cd/toolbox.git ci
             - get: go get -t ./...
-            - gofmt: "find . -name '*.go' | xargs gofmt -s -w"
-            - build: go build -a -o gitversion
-            - get-bzip2: apt-get update && apt-get install -y --no-install-recommends bzip2
             - tag: ./ci/git-tag.sh
-            - release: ./ci/git-release.sh
+            - release: "curl -sL https://git.io/goreleaser | bash"
         secrets:
             # Pushing tags to Git
             - GIT_KEY
             # Pushing releases to GitHub
             - GITHUB_TOKEN
-        environment:
-            RELEASE_FILE: gitversion
