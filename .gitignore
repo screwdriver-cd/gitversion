@@ -2,4 +2,6 @@ artifacts/
 .DS_STORE
 .*.swp
 gitversion
+ci/
+VERSION
 .wercker/
