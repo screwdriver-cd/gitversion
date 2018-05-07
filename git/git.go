@@ -33,8 +33,14 @@ func Tag(tag string) error {
 }
 
 // LastCommit gets the last commit SHA
-func LastCommit() (string, error) {
-	cmd := execCommand("git", "rev-parse", "HEAD")
+func LastCommit(short bool) (string, error) {
+	var cmd *exec.Cmd
+
+	if short {
+		cmd = execCommand("git", "rev-parse", "--short", "HEAD")
+	} else {
+		cmd = execCommand("git", "rev-parse", "HEAD")
+	}
 	out, err := cmd.Output()
 	if err != nil {
 		return "", fmt.Errorf("fetching git commit: %v", err)
@@ -58,7 +64,7 @@ func LastCommitMessage() (string, error) {
 
 // Tagged returns true if the specified commit has been tagged
 func Tagged() (bool, error) {
-	commit, err := LastCommit()
+	commit, err := LastCommit(false)
 	if err != nil {
 		return false, fmt.Errorf("checking current tag: %v", err)
 	}

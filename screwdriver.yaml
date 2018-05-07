@@ -1,6 +1,3 @@
-workflow:
-    - deploy
-
 shared:
     image: golang
     environment:
@@ -8,17 +5,19 @@ shared:
 
 jobs:
     main:
+        requires: [~pr, ~commit]
         steps:
             - path: export PATH=$PATH:$GOPATH/bin
             - get: go get -t ./...
             - vet: go vet ./...
             - gofmt: "find . -name '*.go' | xargs gofmt -s -w"
-            - test: go test ./...
+            - test: go test ./... -coverprofile coverage.out
             # Ensure we can compile
             - build: go build -a -o /dev/null
             # Test cross-compiling as well
             - test-release: "curl -sL https://git.io/goreleaser | bash -s -- --snapshot"
     deploy:
+        requires: main
         steps:
             - path: export PATH=$PATH:$GOPATH/bin
             - setup-ci: git clone https://github.com/screwdriver-cd/toolbox.git ci

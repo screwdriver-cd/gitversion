@@ -3,5 +3,5 @@ artifacts/
 .*.swp
 gitversion
 ci/
-VERSION
 .wercker/
+coverage.out

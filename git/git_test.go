@@ -52,13 +52,36 @@ func TestTags(t *testing.T) {
 	}
 }
 
-func TestLastCommit(t *testing.T) {
+func TestLastCommitLong(t *testing.T) {
 	expected := "9d8ceaaa28f0563e52e1edf3eaae72c814aa1102"
-
-	execCommand = fakeExecCommand
+	execCommand = getFakeExecCommand(func(cmd string, args ...string) {
+		if len(args) != 2 {
+			t.Errorf("wrong arguments supplied to git rev-parse: %v", args)
+		}
+	})
 	defer func() { execCommand = exec.Command }()
 
-	commit, err := LastCommit()
+	commit, err := LastCommit(false)
+
+	if err != nil {
+		t.Errorf("LastCommit() error = %q, should be nil", err)
+	}
+
+	if expected != commit {
+		t.Errorf("LastCommit() = %v, want %v", commit, expected)
+	}
+}
+
+func TestLastCommitShort(t *testing.T) {
+	expected := "9d8ceaa"
+	execCommand = getFakeExecCommand(func(cmd string, args ...string) {
+		if len(args) != 3 {
+			t.Errorf("wrong arguments supplied to git rev-parse: %v", args)
+		}
+	})
+	defer func() { execCommand = exec.Command }()
+
+	commit, err := LastCommit(true)
 
 	if err != nil {
 		t.Errorf("LastCommit() error = %q, should be nil", err)
@@ -170,7 +193,12 @@ func TestHelperProcess(*testing.T) {
 			fmt.Println("minor: this should be bumping minor")
 			return
 		case "rev-parse":
-			fmt.Println("9d8ceaaa28f0563e52e1edf3eaae72c814aa1102")
+			// git rev-parse HEAD
+			if len(args) == 3 {
+				fmt.Println("9d8ceaaa28f0563e52e1edf3eaae72c814aa1102")
+			} else {
+				fmt.Println("9d8ceaa")
+			}
 			return
 		}
 	}
