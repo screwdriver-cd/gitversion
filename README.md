@@ -61,6 +61,12 @@ Example:
 
 And will default to patch if none found or if the commit is already tagged.
 
+### Prerelease
+
+For prerelease versions, we automatically use the short git SHA (e.g. `1.2.3-1644da2`).
+
+_note: prerelease tags should not be pushed to git, only used for local resolution._
+
 ## Testing
 
 ```bash
