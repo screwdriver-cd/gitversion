@@ -11,9 +11,13 @@ func TestFromString(t *testing.T) {
 		input string
 		want  Version
 	}{
-		{"1.2.3", Version{1, 2, 3}},
-		{"3.2.1", Version{3, 2, 1}},
-		{"a.b.c", Version{0, 0, 0}},
+		{"1.2.3", Version{1, 2, 3, ""}},
+		{"3.2.1", Version{3, 2, 1, ""}},
+		{"a.b.c", Version{0, 0, 0, ""}},
+		{"1.b.c", Version{0, 0, 0, ""}},
+		{"1.2.c", Version{0, 0, 0, ""}},
+		{"1.2.3.4", Version{0, 0, 0, ""}},
+		{"3.2.1-abc", Version{3, 2, 1, "abc"}},
 	}
 	for _, test := range tests {
 		if v, _ := FromString(test.input); v != test.want {
@@ -39,20 +43,33 @@ func TestToString(t *testing.T) {
 	}
 }
 
+func TestToStringPre(t *testing.T) {
+	want := "1.2.3-abc"
+	v, _ := FromString(want)
+	got := fmt.Sprintf("%v", v)
+	if got != want {
+		t.Errorf(`FromString(%q).String() == %q`, want, got)
+	}
+}
+
 func TestVersionListSort(t *testing.T) {
 	var versions = List{
-		{2, 1, 3},
-		{1, 2, 3},
-		{2, 2, 3},
-		{3, 1, 2},
-		{1, 2, 3},
+		{2, 1, 3, ""},
+		{1, 2, 3, ""},
+		{2, 2, 3, ""},
+		{3, 1, 2, ""},
+		{1, 2, 2, ""},
+		{1, 2, 3, ""},
+		{1, 2, 3, "abc"},
 	}
 	var want = List{
-		{1, 2, 3},
-		{1, 2, 3},
-		{2, 1, 3},
-		{2, 2, 3},
-		{3, 1, 2},
+		{1, 2, 2, ""},
+		{1, 2, 3, ""},
+		{1, 2, 3, ""},
+		{1, 2, 3, "abc"},
+		{2, 1, 3, ""},
+		{2, 2, 3, ""},
+		{3, 1, 2, ""},
 	}
 
 	sort.Sort(versions)
@@ -61,7 +78,7 @@ func TestVersionListSort(t *testing.T) {
 	}
 	for i, v := range versions {
 		if want[i] != v {
-			t.Errorf("Version %v != %v", want[i], v)
+			t.Errorf("Version %d: %v != %v", i, want[i], v)
 		}
 	}
 }

@@ -184,6 +184,29 @@ func TestBumpAutoMatchFallback(t *testing.T) {
 	Bump("", Auto)
 }
 
+func TestBumpPreRelease(t *testing.T) {
+	expected := "1.1.1-9d8ceaa"
+	gitTag = func(tag string) error {
+		if tag != expected {
+			t.Errorf("git.Tag() called with %v, want %v", tag, expected)
+		}
+		return nil
+	}
+	defer func() { gitTag = git.Tag }()
+
+	gitCommit = func(_ bool) (string, error) {
+		return "9d8ceaa", nil
+	}
+	defer func() { gitCommit = git.LastCommit }()
+
+	gitTags = func() ([]string, error) {
+		return []string{"1.1.1", "0.1.1"}, nil
+	}
+	defer func() { gitTags = git.Tags }()
+
+	Bump("", PreRelease)
+}
+
 func TestBumpPatch(t *testing.T) {
 	expected := "1.1.2"
 	gitTag = func(tag string) error {

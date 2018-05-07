@@ -23,6 +23,8 @@ const (
 	Minor = "minor"
 	// Patch is for specifying the Patch field 0.0.X
 	Patch = "patch"
+	// PreRelease is for specifying the PreRelease field 0.0.0-X
+	PreRelease = "prerelease"
 	// MatchField is the index to get the first capture group, aka the field (major, minor, etc.)
 	MatchField = 1
 )
@@ -34,6 +36,13 @@ var (
 	COMMIT  = "none"
 	DATE    = "unknown"
 )
+
+var gitTags = git.Tags
+var gitTag = git.Tag
+var gitTagged = git.Tagged
+var gitCommit = git.LastCommit
+var gitMessage = git.LastCommitMessage
+var errNoVersionTags = errors.New("no valid version tags found")
 
 // Bump increments the specified field of the latest version
 func Bump(prefix string, field string) error {
@@ -59,7 +68,7 @@ func Bump(prefix string, field string) error {
 			if mesErr != nil {
 				return fmt.Errorf("determing auto patch %v", mesErr)
 			}
-			re := regexp.MustCompile("(?i)\\[(major|minor|patch)( bump)?\\]")
+			re := regexp.MustCompile("(?i)\\[(major|minor|patch|prerelease)( bump)?\\]")
 			m := re.FindStringSubmatch(cm)
 			if len(m) == 0 {
 				field = Patch
@@ -81,6 +90,12 @@ func Bump(prefix string, field string) error {
 		v.Patch = 0
 	case Patch:
 		v.Patch++
+	case PreRelease:
+		commit, cerr := gitCommit(true)
+		if cerr != nil {
+			return fmt.Errorf("getting current commit sha %v", cerr)
+		}
+		v.PreRelease = commit
 	}
 
 	if err = gitTag(fmt.Sprintf("%v%v", prefix, v.String())); err != nil {
@@ -89,12 +104,6 @@ func Bump(prefix string, field string) error {
 	fmt.Fprintf(os.Stdout, "%s%s\n", prefix, v)
 	return nil
 }
-
-var gitTags = git.Tags
-var gitTag = git.Tag
-var gitTagged = git.Tagged
-var gitMessage = git.LastCommitMessage
-var errNoVersionTags = errors.New("no valid version tags found")
 
 func latestVersion(prefix string) (v version.Version, err error) {
 	versions, err := versions(prefix)
@@ -150,7 +159,7 @@ func main() {
 	actionLatest := func(c *cli.Context) error {
 		v, err := latestVersion(prefix)
 		if err != nil {
-			fmt.Fprint(os.Stderr, "Error: ")
+			fmt.Fprintf(os.Stderr, "Error: %v", err)
 			return err
 		}
 		fmt.Fprintf(os.Stdout, "%s%s\n", prefix, v)
@@ -163,6 +172,17 @@ func main() {
 			Aliases: []string{"b"},
 			Usage:   "increment the version and create a new git tag",
 			Subcommands: []cli.Command{
+				{
+					Name:  "prerelease",
+					Usage: "bump the prerelease version",
+					Action: func(c *cli.Context) error {
+						if err := Bump(prefix, PreRelease); err != nil {
+							fmt.Fprint(os.Stderr, "Error: ")
+							return err
+						}
+						return nil
+					},
+				},
 				{
 					Name:  "patch",
 					Usage: "bump the patch version",
