@@ -5,3 +5,4 @@ gitversion
 ci/
 .wercker/
 coverage.out
+VERSION
