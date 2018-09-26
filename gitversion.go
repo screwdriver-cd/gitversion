@@ -73,7 +73,7 @@ func Bump(prefix string, field string) error {
 			if len(m) == 0 {
 				field = Patch
 			} else {
-				field = m[MatchField]
+				field = strings.ToLower(m[MatchField])
 			}
 		}
 	}
@@ -177,7 +177,7 @@ func main() {
 					Usage: "bump the prerelease version",
 					Action: func(c *cli.Context) error {
 						if err := Bump(prefix, PreRelease); err != nil {
-							fmt.Fprint(os.Stderr, "Error: ")
+							fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 							return err
 						}
 						return nil
@@ -188,7 +188,7 @@ func main() {
 					Usage: "bump the patch version",
 					Action: func(c *cli.Context) error {
 						if err := Bump(prefix, Patch); err != nil {
-							fmt.Fprint(os.Stderr, "Error: ")
+							fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 							return err
 						}
 						return nil
@@ -199,7 +199,7 @@ func main() {
 					Usage: "bump the minor version",
 					Action: func(c *cli.Context) error {
 						if err := Bump(prefix, Minor); err != nil {
-							fmt.Fprint(os.Stderr, "Error: ")
+							fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 							return err
 						}
 						return nil
@@ -210,7 +210,7 @@ func main() {
 					Usage: "bump the major version",
 					Action: func(c *cli.Context) error {
 						if err := Bump(prefix, Major); err != nil {
-							fmt.Fprint(os.Stderr, "Error: ")
+							fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 							return err
 						}
 						return nil
@@ -221,7 +221,7 @@ func main() {
 					Usage: "bump the version specified in the last commit",
 					Action: func(c *cli.Context) error {
 						if err := Bump(prefix, Auto); err != nil {
-							fmt.Fprint(os.Stderr, "Error: ")
+							fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 							return err
 						}
 						return nil

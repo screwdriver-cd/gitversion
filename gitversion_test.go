@@ -97,7 +97,10 @@ func TestBumpAutoTagged(t *testing.T) {
 	}
 	defer func() { gitTagged = git.Tagged }()
 
-	Bump("", Auto)
+	err := Bump("", Auto)
+	if err != nil {
+		t.Errorf("Unexpected error: %v", err)
+	}
 }
 
 func TestBumpAutoMatch(t *testing.T) {
@@ -125,7 +128,10 @@ func TestBumpAutoMatch(t *testing.T) {
 	}
 	defer func() { gitMessage = git.LastCommitMessage }()
 
-	Bump("", Auto)
+	err := Bump("", Auto)
+	if err != nil {
+		t.Errorf("Unexpected error: %v", err)
+	}
 }
 
 func TestBumpAutoMatchAlternate(t *testing.T) {
@@ -153,7 +159,10 @@ func TestBumpAutoMatchAlternate(t *testing.T) {
 	}
 	defer func() { gitMessage = git.LastCommitMessage }()
 
-	Bump("", Auto)
+	err := Bump("", Auto)
+	if err != nil {
+		t.Errorf("Unexpected error: %v", err)
+	}
 }
 
 func TestBumpAutoMatchFallback(t *testing.T) {
@@ -181,7 +190,10 @@ func TestBumpAutoMatchFallback(t *testing.T) {
 	}
 	defer func() { gitMessage = git.LastCommitMessage }()
 
-	Bump("", Auto)
+	err := Bump("", Auto)
+	if err != nil {
+		t.Errorf("Unexpected error: %v", err)
+	}
 }
 
 func TestBumpPreRelease(t *testing.T) {
@@ -204,7 +216,10 @@ func TestBumpPreRelease(t *testing.T) {
 	}
 	defer func() { gitTags = git.Tags }()
 
-	Bump("", PreRelease)
+	err := Bump("", PreRelease)
+	if err != nil {
+		t.Errorf("Unexpected error: %v", err)
+	}
 }
 
 func TestBumpPatch(t *testing.T) {
@@ -222,7 +237,10 @@ func TestBumpPatch(t *testing.T) {
 	}
 	defer func() { gitTags = git.Tags }()
 
-	Bump("", Patch)
+	err := Bump("", Patch)
+	if err != nil {
+		t.Errorf("Unexpected error: %v", err)
+	}
 }
 
 func TestBumpMinor(t *testing.T) {
@@ -240,7 +258,10 @@ func TestBumpMinor(t *testing.T) {
 	}
 	defer func() { gitTags = git.Tags }()
 
-	Bump("", Minor)
+	err := Bump("", Minor)
+	if err != nil {
+		t.Errorf("Unexpected error: %v", err)
+	}
 }
 
 func TestBumpMajor(t *testing.T) {
@@ -258,7 +279,10 @@ func TestBumpMajor(t *testing.T) {
 	}
 	defer func() { gitTags = git.Tags }()
 
-	Bump("", Major)
+	err := Bump("", Major)
+	if err != nil {
+		t.Errorf("Unexpected error: %v", err)
+	}
 }
 
 func TestBumpWithNoVersions(t *testing.T) {
@@ -276,7 +300,10 @@ func TestBumpWithNoVersions(t *testing.T) {
 	}
 	defer func() { gitTags = git.Tags }()
 
-	Bump("", Patch)
+	err := Bump("", Patch)
+	if err != nil {
+		t.Errorf("Unexpected error: %v", err)
+	}
 }
 
 func TestBumpWithBadField(t *testing.T) {
@@ -295,8 +322,8 @@ func TestBumpWithBadField(t *testing.T) {
 	defer func() { gitTags = git.Tags }()
 
 	err := Bump("", "foobar")
-	if err == nil {
-		t.Error("expected error from Bump()")
+	if err.Error() != "unknown field type" {
+		t.Errorf("Unexpected error: %v", err)
 	}
 }
 
