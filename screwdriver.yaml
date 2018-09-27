@@ -1,5 +1,5 @@
 shared:
-    image: golang
+    image: golang:1.10
     environment:
         GOPATH: /sd/workspace
 
