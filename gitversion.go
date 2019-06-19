@@ -239,5 +239,9 @@ func main() {
 
 	app.Action = actionLatest
 
-	app.Run(os.Args)
+	// if Run receives an error, the error message is already printed out to
+	// stderr, but we should exit with an error code
+	if err := app.Run(os.Args); err != nil {
+		os.Exit(1)
+	}
 }
