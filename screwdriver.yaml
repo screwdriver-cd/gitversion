@@ -1,5 +1,5 @@
 shared:
-    image: golang:1.10
+    image: golang
     environment:
         GOPATH: /sd/workspace
 
@@ -8,9 +8,9 @@ jobs:
         requires: [~pr, ~commit]
         steps:
             - path: export PATH=$PATH:$GOPATH/bin
-            - get: go get -t ./...
+            - modverify: go version; go mod verify
             - vet: go vet ./...
-            - gofmt: "find . -name '*.go' | xargs gofmt -s -w"
+            - gofmt: gofmt -l .
             - test: go test ./... -coverprofile coverage.out
             # Ensure we can compile
             - build: go build -a -o /dev/null
