@@ -1,12 +1,11 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"regexp"
 	"sort"
-
-	"errors"
 	"strings"
 
 	"github.com/screwdriver-cd/gitversion/git"
@@ -60,7 +59,7 @@ func Bump(prefix string, field string) error {
 	fmt.Fprintf(os.Stderr, "Bumping %v for version %v\n", field, v)
 	if field == Auto {
 		// If this commit already has a tag, patch
-		if tag, _ := gitTagged(); tag == true {
+		if tag, _ := gitTagged(); tag {
 			field = Patch
 		} else {
 			// Get commit message and find any reference
@@ -68,7 +67,7 @@ func Bump(prefix string, field string) error {
 			if mesErr != nil {
 				return fmt.Errorf("determing auto patch %v", mesErr)
 			}
-			re := regexp.MustCompile("(?i)\\[(major|minor|patch|prerelease)( bump)?\\]")
+			re := regexp.MustCompile(`(?i)\[(major|minor|patch|prerelease)( bump)?\]`)
 			m := re.FindStringSubmatch(cm)
 			if len(m) == 0 {
 				field = Patch
