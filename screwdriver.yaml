@@ -8,7 +8,7 @@ jobs:
         requires: [~pr, ~commit]
         steps:
             - path: export PATH=$PATH:$GOPATH/bin
-            - modverify: go mod verify
+            - modverify: go version; go mod verify
             - vet: go vet ./...
             - gofmt: gofmt -l .
             - test: go test ./... -coverprofile coverage.out

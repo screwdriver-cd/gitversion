@@ -8,7 +8,7 @@ builds:
       - amd64
     # Include the default settings from https://goreleaser.com/#builds
     # Also include static compilation
-    ldflags: -d -s -w -X main.VERSION={{.Version}} -X main.COMMIT={{.Commit}} -X main.DATE={{.Date}} -extldflags "-static"
+    ldflags: -s -w -X main.VERSION={{.Version}} -X main.COMMIT={{.Commit}} -X main.DATE={{.Date}} -extldflags "-static"
     # Ensure the binary is static
     env:
       - CGO_ENABLED=0
