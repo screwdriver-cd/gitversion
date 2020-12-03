@@ -5,13 +5,16 @@ shared:
 
 jobs:
     main:
-        requires: [~pr, ~commit]
+        environment:
+            SD_SONAR_OPTS:  "-Dsonar.sources=./ -Dsonar.exclusions=**/*_test.go,**/vendor/** -Dsonar.tests=./ -Dsonar.test.inclusions=**/*_test.go -Dsonar.test.exclusions=**/vendor/** -Dsonar.go.coverage.reportPaths=${SD_ARTIFACTS_DIR}/coverage.out -Dsonar.go.tests.reportPaths=${SD_ARTIFACTS_DIR}/report.json"
+        requires: [~commit, ~pr]
         steps:
             - path: export PATH=$PATH:$GOPATH/bin
             - modverify: go version; go mod verify
             - vet: go vet ./...
             - gofmt: gofmt -l .
-            - test: go test ./... -coverprofile coverage.out
+            - test-setup: go get gotest.tools/gotestsum@v0.6.0
+            - test: gotestsum --format testname --jsonfile ${SD_ARTIFACTS_DIR}/report.json -- -coverprofile=${SD_ARTIFACTS_DIR}/coverage.out ./...
             # Ensure we can compile
             - build: go build -a -o /dev/null
             # Test cross-compiling as well
