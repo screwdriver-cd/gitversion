@@ -26,7 +26,7 @@ v1.2.4
 
 > gitversion --prefix v bump patch
 Bumping patch for version 1.2.4
-1.2.5
+v1.2.5
 
 > git tag
 v1.2.3
