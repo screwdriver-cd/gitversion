@@ -29,6 +29,6 @@ jobs:
             - release: "curl -sL https://git.io/goreleaser | bash"
         secrets:
             # Pushing tags to Git
-            - GIT_KEY
+            - GIT_KEY_BASE64
             # Pushing releases to GitHub
             - GITHUB_TOKEN
