@@ -9,11 +9,16 @@ import (
 var execCommand = exec.Command
 
 // Tags returns the list of git tags as a string slice
-func Tags() ([]string, error) {
-	cmd := execCommand("git", "tag")
+func Tags(merged bool) ([]string, error) {
+	args := []string{"tag"}
+	if merged {
+		args = append(args, "--merged")
+	}
+
+	cmd := execCommand("git", args...)
 	out, err := cmd.Output()
 	if err != nil {
-		return nil, fmt.Errorf("fetching git tags: %v", err)
+		return nil, fmt.Errorf("fetching git tags: %w", err)
 	}
 
 	trimmed := strings.TrimSpace(string(out))
@@ -26,7 +31,7 @@ func Tag(tag string) error {
 	cmd := execCommand("git", "tag", tag)
 	_, err := cmd.Output()
 	if err != nil {
-		return fmt.Errorf("tagging the commit in git: %v", err)
+		return fmt.Errorf("tagging the commit in git: %w", err)
 	}
 
 	return nil
@@ -43,7 +48,7 @@ func LastCommit(short bool) (string, error) {
 	}
 	out, err := cmd.Output()
 	if err != nil {
-		return "", fmt.Errorf("fetching git commit: %v", err)
+		return "", fmt.Errorf("fetching git commit: %w", err)
 	}
 
 	trimmed := strings.TrimSpace(string(out))
@@ -55,7 +60,7 @@ func LastCommitMessage() (string, error) {
 	cmd := execCommand("git", "log", "-1", "--pretty=%B")
 	out, err := cmd.Output()
 	if err != nil {
-		return "", fmt.Errorf("fetching git commit message: %v", err)
+		return "", fmt.Errorf("fetching git commit message: %w", err)
 	}
 
 	trimmed := strings.TrimSpace(string(out))
@@ -66,7 +71,7 @@ func LastCommitMessage() (string, error) {
 func Tagged() (bool, error) {
 	commit, err := LastCommit(false)
 	if err != nil {
-		return false, fmt.Errorf("checking current tag: %v", err)
+		return false, fmt.Errorf("checking current tag: %w", err)
 	}
 	cmd := execCommand("git", "tag", "--contains", commit)
 	t, err := cmd.Output()

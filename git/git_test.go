@@ -35,7 +35,7 @@ func TestTags(t *testing.T) {
 	execCommand = fakeExecCommand
 	defer func() { execCommand = exec.Command }()
 
-	tags, err := Tags()
+	tags, err := Tags(false)
 
 	if err != nil {
 		t.Errorf("Tags() error = %q, should be nil", err)

@@ -1,3 +1,13 @@
+brews:
+  - tap:
+      owner: screwdriver-cd
+      name: gitversion
+    folder: Formula
+    homepage: https://github.com/screwdriver-cd/gitversion
+    description: A helper for bumping versions via git tags.
+    commit_msg_template: "[skip ci] Brew formula update for {{ .ProjectName }} version {{ .Tag }}"
+    test: |
+      system "#{bin}/gitversion", "--version"
 builds:
   - binary: gitversion
     # Build for Linux and OSX

@@ -44,8 +44,8 @@ var gitMessage = git.LastCommitMessage
 var errNoVersionTags = errors.New("no valid version tags found")
 
 // Bump increments the specified field of the latest version
-func Bump(prefix string, field string) error {
-	v, err := latestVersion(prefix)
+func Bump(prefix string, field string, merged bool) error {
+	v, err := latestVersion(prefix, merged)
 	if err != nil {
 		if err == errNoVersionTags {
 			s := err.Error()
@@ -104,8 +104,8 @@ func Bump(prefix string, field string) error {
 	return nil
 }
 
-func latestVersion(prefix string) (v version.Version, err error) {
-	versions, err := versions(prefix)
+func latestVersion(prefix string, merged bool) (v version.Version, err error) {
+	versions, err := versions(prefix, merged)
 	if err != nil {
 		return v, err
 	}
@@ -114,9 +114,9 @@ func latestVersion(prefix string) (v version.Version, err error) {
 	return versions[0], err
 }
 
-func versions(prefix string) (version.List, error) {
+func versions(prefix string, merged bool) (version.List, error) {
 	versions := version.List{}
-	tags, err := gitTags()
+	tags, err := gitTags(merged)
 	if err != nil {
 		return nil, fmt.Errorf("fetching git tags: %v", err)
 	}
@@ -141,6 +141,7 @@ func versions(prefix string) (version.List, error) {
 
 func main() {
 	var prefix string
+	var merged bool
 
 	app := cli.NewApp()
 	app.Name = "gitversion"
@@ -153,10 +154,15 @@ func main() {
 			Usage:       "set a prefix for the tag name (e.g. v1.0.0)",
 			Destination: &prefix,
 		},
+		cli.BoolFlag{
+			Name:        "merged",
+			Usage:       "consider tags merged into this branch",
+			Destination: &merged,
+		},
 	}
 
 	actionLatest := func(c *cli.Context) error {
-		v, err := latestVersion(prefix)
+		v, err := latestVersion(prefix, merged)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error: %v", err)
 			return err
@@ -175,7 +181,7 @@ func main() {
 					Name:  "prerelease",
 					Usage: "bump the prerelease version",
 					Action: func(c *cli.Context) error {
-						if err := Bump(prefix, PreRelease); err != nil {
+						if err := Bump(prefix, PreRelease, merged); err != nil {
 							fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 							return err
 						}
@@ -186,7 +192,7 @@ func main() {
 					Name:  "patch",
 					Usage: "bump the patch version",
 					Action: func(c *cli.Context) error {
-						if err := Bump(prefix, Patch); err != nil {
+						if err := Bump(prefix, Patch, merged); err != nil {
 							fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 							return err
 						}
@@ -197,7 +203,7 @@ func main() {
 					Name:  "minor",
 					Usage: "bump the minor version",
 					Action: func(c *cli.Context) error {
-						if err := Bump(prefix, Minor); err != nil {
+						if err := Bump(prefix, Minor, merged); err != nil {
 							fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 							return err
 						}
@@ -208,7 +214,7 @@ func main() {
 					Name:  "major",
 					Usage: "bump the major version",
 					Action: func(c *cli.Context) error {
-						if err := Bump(prefix, Major); err != nil {
+						if err := Bump(prefix, Major, merged); err != nil {
 							fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 							return err
 						}
@@ -219,7 +225,7 @@ func main() {
 					Name:  "auto",
 					Usage: "bump the version specified in the last commit",
 					Action: func(c *cli.Context) error {
-						if err := Bump(prefix, Auto); err != nil {
+						if err := Bump(prefix, Auto, merged); err != nil {
 							fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 							return err
 						}
