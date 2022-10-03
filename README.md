@@ -81,3 +81,18 @@ Code licensed under the BSD 3-Clause license. See LICENSE file for terms.
 [issues-url]: https://github.com/screwdriver-cd/screwdriver/issues
 [status-image]: https://cd.screwdriver.cd/pipelines/16/badge
 [status-url]: https://cd.screwdriver.cd/pipelines/16
+
+## Installing locally using homebrew
+
+- prerequisite: install [homebrew](https://homebrew.sh/)
+- Tap gitversion
+
+    ```bash
+    brew tap screwdriver-cd/meta-cli https://github.com/screwdriver-cd/gitversion.git
+    ```
+
+- Install gitversion
+
+    ```bash
+    brew install gitversion
+    ```
