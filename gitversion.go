@@ -98,7 +98,7 @@ func Bump(prefix string, field string, merged bool) error {
 	}
 
 	if err = gitTag(fmt.Sprintf("%v%v", prefix, v.String())); err != nil {
-		return fmt.Errorf("creating new tag %v", v)
+		return fmt.Errorf("creating new tag %v: %w", v, err)
 	}
 	fmt.Fprintf(os.Stdout, "%s%s\n", prefix, v)
 	return nil
