@@ -1,5 +1,5 @@
 shared:
-    image: golang:1.17
+    image: golang:1.19
     environment:
         GOPATH: /sd/workspace
 
@@ -13,7 +13,7 @@ jobs:
             - modverify: go version; go mod verify
             - vet: go vet ./...
             - gofmt: gofmt -l .
-            - test-setup: go get gotest.tools/gotestsum@latest
+            - test-setup: go install gotest.tools/gotestsum@latest
             - test: gotestsum --format testname --jsonfile ${SD_ARTIFACTS_DIR}/report.json -- -coverprofile=${SD_ARTIFACTS_DIR}/coverage.out ./...
             # Ensure we can compile
             - build: go build -a -o /dev/null
