@@ -88,7 +88,7 @@ Code licensed under the BSD 3-Clause license. See LICENSE file for terms.
 - Tap gitversion
 
     ```bash
-    brew tap screwdriver-cd/meta-cli https://github.com/screwdriver-cd/gitversion.git
+    brew tap screwdriver-cd/gitversion https://github.com/screwdriver-cd/gitversion.git
     ```
 
 - Install gitversion
