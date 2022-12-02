@@ -1,6 +1,8 @@
 package main
 
 import (
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"testing"
 
 	"github.com/screwdriver-cd/gitversion/git"
@@ -31,19 +33,12 @@ func TestVersions(t *testing.T) {
 	defer func() { gitTags = git.Tags }()
 
 	v, err := versions("", false)
+	require.NoError(t, err)
 
-	if err != nil {
-		t.Errorf("versions() error = %v, should be nil", err)
-	}
-
-	if len(expected) != len(v) {
-		t.Fatalf("len(Versions()) = %v, want %v", len(v), len(expected))
-	}
+	assert.Equal(t, len(expected), len(v))
 
 	for i, version := range v {
-		if expected[i] != version.String() {
-			t.Errorf("Versions()[%v] = %v, want %v", i, version, expected[i])
-		}
+		assert.Equalf(t, expected[i], version.String(), "Versions()[%d] = %s, want %s", i, version, expected[i])
 	}
 }
 
@@ -54,12 +49,8 @@ func TestNoVersions(t *testing.T) {
 	defer func() { gitTags = git.Tags }()
 
 	v, err := versions("", false)
-	if err == nil {
-		t.Errorf("error value for an empty version list should be non-nil")
-	}
-	if len(v) != 0 {
-		t.Errorf("Expected empty version.List, got: %v", v)
-	}
+	require.Error(t, err, "error value for an empty version list should be non-nil")
+	assert.Empty(t, v)
 }
 
 func TestLatestVersion(t *testing.T) {
@@ -69,20 +60,14 @@ func TestLatestVersion(t *testing.T) {
 	want := "2.1.2"
 
 	latest, err := latestVersion("", false)
-	if err != nil {
-		t.Errorf("Unexpected error from latestVersion(): %v", err)
-	}
-	if latest.String() != want {
-		t.Errorf("latestVersion() = %v, want %v", latest, want)
-	}
+	require.NoError(t, err)
+	assert.Equal(t, want, latest.String())
 }
 
 func TestBumpAutoTagged(t *testing.T) {
 	expected := "1.1.2"
 	gitTag = func(tag string) error {
-		if tag != expected {
-			t.Errorf("git.Tag() called with %v, want %v", tag, expected)
-		}
+		assert.Equal(t, expected, tag)
 		return nil
 	}
 	defer func() { gitTag = git.Tag }()
@@ -97,18 +82,13 @@ func TestBumpAutoTagged(t *testing.T) {
 	}
 	defer func() { gitTagged = git.Tagged }()
 
-	err := Bump("", Auto, false)
-	if err != nil {
-		t.Errorf("Unexpected error: %v", err)
-	}
+	require.NoError(t, Bump("", Auto, false, false))
 }
 
 func TestBumpAutoMatch(t *testing.T) {
 	expected := "2.0.0"
 	gitTag = func(tag string) error {
-		if tag != expected {
-			t.Errorf("git.Tag() called with %v, want %v", tag, expected)
-		}
+		assert.Equal(t, expected, tag)
 		return nil
 	}
 	defer func() { gitTag = git.Tag }()
@@ -128,18 +108,13 @@ func TestBumpAutoMatch(t *testing.T) {
 	}
 	defer func() { gitMessage = git.LastCommitMessage }()
 
-	err := Bump("", Auto, false)
-	if err != nil {
-		t.Errorf("Unexpected error: %v", err)
-	}
+	require.NoError(t, Bump("", Auto, false, false))
 }
 
 func TestBumpAutoMatchAlternate(t *testing.T) {
 	expected := "2.0.0"
 	gitTag = func(tag string) error {
-		if tag != expected {
-			t.Errorf("git.Tag() called with %v, want %v", tag, expected)
-		}
+		assert.Equal(t, expected, tag)
 		return nil
 	}
 	defer func() { gitTag = git.Tag }()
@@ -159,18 +134,13 @@ func TestBumpAutoMatchAlternate(t *testing.T) {
 	}
 	defer func() { gitMessage = git.LastCommitMessage }()
 
-	err := Bump("", Auto, false)
-	if err != nil {
-		t.Errorf("Unexpected error: %v", err)
-	}
+	require.NoError(t, Bump("", Auto, false, false))
 }
 
 func TestBumpAutoMatchFallback(t *testing.T) {
 	expected := "1.1.2"
 	gitTag = func(tag string) error {
-		if tag != expected {
-			t.Errorf("git.Tag() called with %v, want %v", tag, expected)
-		}
+		assert.Equal(t, expected, tag)
 		return nil
 	}
 	defer func() { gitTag = git.Tag }()
@@ -190,18 +160,13 @@ func TestBumpAutoMatchFallback(t *testing.T) {
 	}
 	defer func() { gitMessage = git.LastCommitMessage }()
 
-	err := Bump("", Auto, false)
-	if err != nil {
-		t.Errorf("Unexpected error: %v", err)
-	}
+	require.NoError(t, Bump("", Auto, false, false))
 }
 
 func TestBumpPreRelease(t *testing.T) {
 	expected := "1.1.1-9d8ceaa"
 	gitTag = func(tag string) error {
-		if tag != expected {
-			t.Errorf("git.Tag() called with %v, want %v", tag, expected)
-		}
+		assert.Equal(t, expected, tag)
 		return nil
 	}
 	defer func() { gitTag = git.Tag }()
@@ -216,18 +181,13 @@ func TestBumpPreRelease(t *testing.T) {
 	}
 	defer func() { gitTags = git.Tags }()
 
-	err := Bump("", PreRelease, false)
-	if err != nil {
-		t.Errorf("Unexpected error: %v", err)
-	}
+	require.NoError(t, Bump("", PreRelease, false, false))
 }
 
 func TestBumpPatch(t *testing.T) {
 	expected := "1.1.2"
 	gitTag = func(tag string) error {
-		if tag != expected {
-			t.Errorf("git.Tag() called with %v, want %v", tag, expected)
-		}
+		assert.Equal(t, expected, tag)
 		return nil
 	}
 	defer func() { gitTag = git.Tag }()
@@ -237,18 +197,13 @@ func TestBumpPatch(t *testing.T) {
 	}
 	defer func() { gitTags = git.Tags }()
 
-	err := Bump("", Patch, false)
-	if err != nil {
-		t.Errorf("Unexpected error: %v", err)
-	}
+	require.NoError(t, Bump("", Patch, false, false))
 }
 
 func TestBumpMinor(t *testing.T) {
 	expected := "1.2.0"
 	gitTag = func(tag string) error {
-		if tag != expected {
-			t.Errorf("git.Tag() called with %v, want %v", tag, expected)
-		}
+		assert.Equal(t, expected, tag)
 		return nil
 	}
 	defer func() { gitTag = git.Tag }()
@@ -258,18 +213,28 @@ func TestBumpMinor(t *testing.T) {
 	}
 	defer func() { gitTags = git.Tags }()
 
-	err := Bump("", Minor, false)
-	if err != nil {
-		t.Errorf("Unexpected error: %v", err)
+	require.NoError(t, Bump("", Minor, false, false))
+}
+
+func TestBumpMinorDryRun(t *testing.T) {
+	gitTag = func(tag string) error {
+		assert.Fail(t, "Unexpected call to gitTag")
+		return nil
 	}
+	defer func() { gitTag = git.Tag }()
+
+	gitTags = func(bool) ([]string, error) {
+		return []string{"1.1.1", "0.1.1"}, nil
+	}
+	defer func() { gitTags = git.Tags }()
+
+	require.NoError(t, Bump("", Minor, false, true))
 }
 
 func TestBumpMajor(t *testing.T) {
 	expected := "2.0.0"
 	gitTag = func(tag string) error {
-		if tag != expected {
-			t.Errorf("git.Tag() called with %v, want %v", tag, expected)
-		}
+		assert.Equal(t, expected, tag)
 		return nil
 	}
 	defer func() { gitTag = git.Tag }()
@@ -279,18 +244,13 @@ func TestBumpMajor(t *testing.T) {
 	}
 	defer func() { gitTags = git.Tags }()
 
-	err := Bump("", Major, false)
-	if err != nil {
-		t.Errorf("Unexpected error: %v", err)
-	}
+	require.NoError(t, Bump("", Major, false, false))
 }
 
 func TestBumpWithNoVersions(t *testing.T) {
 	expected := "0.0.1"
 	gitTag = func(tag string) error {
-		if tag != expected {
-			t.Errorf("git.Tag() called with %v, want %v", tag, expected)
-		}
+		assert.Equal(t, expected, tag)
 		return nil
 	}
 	defer func() { gitTag = git.Tag }()
@@ -300,18 +260,13 @@ func TestBumpWithNoVersions(t *testing.T) {
 	}
 	defer func() { gitTags = git.Tags }()
 
-	err := Bump("", Patch, false)
-	if err != nil {
-		t.Errorf("Unexpected error: %v", err)
-	}
+	require.NoError(t, Bump("", Patch, false, false))
 }
 
 func TestBumpWithBadField(t *testing.T) {
 	expected := "0.0.1"
 	gitTag = func(tag string) error {
-		if tag != expected {
-			t.Errorf("git.Tag() called with %v, want %v", tag, expected)
-		}
+		assert.Equal(t, expected, tag)
 		return nil
 	}
 	defer func() { gitTag = git.Tag }()
@@ -321,10 +276,7 @@ func TestBumpWithBadField(t *testing.T) {
 	}
 	defer func() { gitTags = git.Tags }()
 
-	err := Bump("", "foobar", false)
-	if err.Error() != "unknown field type" {
-		t.Errorf("Unexpected error: %v", err)
-	}
+	require.EqualError(t, Bump("", "foobar", false, false), "unknown field type")
 }
 
 func TestPrefix(t *testing.T) {
@@ -339,13 +291,8 @@ func TestPrefix(t *testing.T) {
 	defer func() { gitTags = git.Tags }()
 
 	latest, err := latestVersion("bigPrefix", false)
-	if err != nil {
-		t.Errorf("unexpected error from latestVersion(): %v", err)
-	}
-
-	if latest.String() != expected {
-		t.Errorf("latestVersion() = %v, want %v", latest, expected)
-	}
+	require.NoError(t, err)
+	assert.Equal(t, expected, latest.String())
 }
 
 func ExampleBump() {
@@ -362,6 +309,6 @@ func ExampleBump() {
 	}
 	defer func() { gitTags = git.Tags }()
 
-	Bump("v", Patch, false)
+	Bump("v", Patch, false, false)
 	// Output: v2.2.1
 }
