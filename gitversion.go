@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"log"
 	"os"
 	"regexp"
 	"sort"
@@ -10,7 +11,7 @@ import (
 
 	"github.com/screwdriver-cd/gitversion/git"
 	"github.com/screwdriver-cd/gitversion/version"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 )
 
 const (
@@ -44,19 +45,19 @@ var gitMessage = git.LastCommitMessage
 var errNoVersionTags = errors.New("no valid version tags found")
 
 // Bump increments the specified field of the latest version
-func Bump(prefix string, field string, merged bool) error {
+func Bump(prefix string, field string, merged, dryrun bool) error {
 	v, err := latestVersion(prefix, merged)
 	if err != nil {
 		if err == errNoVersionTags {
 			s := err.Error()
 			s = fmt.Sprintf("%s%s", strings.ToUpper(string(s[0])), s[1:])
-			fmt.Fprintf(os.Stderr, "WARNING: %v. Using %v\n", s, v)
+			log.Printf("WARNING: %v. Using %v", s, v)
 		} else {
-			return fmt.Errorf("getting latest version %v: %v", v, err)
+			return fmt.Errorf("getting latest version %v: %w", v, err)
 		}
 	}
 
-	fmt.Fprintf(os.Stderr, "Bumping %v for version %v\n", field, v)
+	log.Printf("Bumping %v for version %v", field, v)
 	if field == Auto {
 		// If this commit already has a tag, patch
 		if tag, _ := gitTagged(); tag {
@@ -65,7 +66,7 @@ func Bump(prefix string, field string, merged bool) error {
 			// Get commit message and find any reference
 			cm, mesErr := gitMessage()
 			if mesErr != nil {
-				return fmt.Errorf("determing auto patch %v", mesErr)
+				return fmt.Errorf("determing auto patch %w", mesErr)
 			}
 			re := regexp.MustCompile(`(?i)\[(major|minor|patch|prerelease)( bump)?\]`)
 			m := re.FindStringSubmatch(cm)
@@ -92,15 +93,18 @@ func Bump(prefix string, field string, merged bool) error {
 	case PreRelease:
 		commit, cerr := gitCommit(true)
 		if cerr != nil {
-			return fmt.Errorf("getting current commit sha %v", cerr)
+			return fmt.Errorf("getting current commit sha %w", cerr)
 		}
 		v.PreRelease = commit
 	}
 
-	if err = gitTag(fmt.Sprintf("%v%v", prefix, v.String())); err != nil {
+	if dryrun {
+		log.Print("Dryrun; not git tagging")
+	} else if err = gitTag(fmt.Sprintf("%s%s", prefix, v.String())); err != nil {
 		return fmt.Errorf("creating new tag %v: %w", v, err)
 	}
-	fmt.Fprintf(os.Stdout, "%s%s\n", prefix, v)
+	// Print out the new tag
+	fmt.Printf("%s%s\n", prefix, v)
 	return nil
 }
 
@@ -118,7 +122,7 @@ func versions(prefix string, merged bool) (version.List, error) {
 	versions := version.List{}
 	tags, err := gitTags(merged)
 	if err != nil {
-		return nil, fmt.Errorf("fetching git tags: %v", err)
+		return nil, fmt.Errorf("fetching git tags: %w", err)
 	}
 
 	for _, tag := range tags {
@@ -141,7 +145,7 @@ func versions(prefix string, merged bool) (version.List, error) {
 
 func main() {
 	var prefix string
-	var merged bool
+	var merged, dryrun bool
 
 	app := cli.NewApp()
 	app.Name = "gitversion"
@@ -149,40 +153,46 @@ func main() {
 	app.Version = fmt.Sprintf("%v, commit %v, built at %v", VERSION, COMMIT, DATE)
 
 	app.Flags = []cli.Flag{
-		cli.StringFlag{
+		&cli.StringFlag{
 			Name:        "prefix",
 			Usage:       "set a prefix for the tag name (e.g. v1.0.0)",
 			Destination: &prefix,
 		},
-		cli.BoolFlag{
+		&cli.BoolFlag{
 			Name:        "merged",
 			Usage:       "consider tags merged into this branch",
 			Destination: &merged,
+		},
+		&cli.BoolFlag{
+			Name:        "dry-run",
+			Usage:       "do not add a git tag; only report the tag that would be added",
+			Destination: &dryrun,
+			Aliases:     []string{"n"},
 		},
 	}
 
 	actionLatest := func(c *cli.Context) error {
 		v, err := latestVersion(prefix, merged)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error: %v", err)
+			log.Printf("Error: %v", err)
 			return err
 		}
-		fmt.Fprintf(os.Stdout, "%s%s\n", prefix, v)
-		return nil
+		_, err = fmt.Printf("%s%s\n", prefix, v)
+		return err
 	}
 
-	app.Commands = []cli.Command{
+	app.Commands = []*cli.Command{
 		{
 			Name:    "bump",
 			Aliases: []string{"b"},
 			Usage:   "increment the version and create a new git tag",
-			Subcommands: []cli.Command{
+			Subcommands: []*cli.Command{
 				{
 					Name:  "prerelease",
 					Usage: "bump the prerelease version",
 					Action: func(c *cli.Context) error {
-						if err := Bump(prefix, PreRelease, merged); err != nil {
-							fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+						if err := Bump(prefix, PreRelease, merged, dryrun); err != nil {
+							log.Printf("Error: %v", err)
 							return err
 						}
 						return nil
@@ -192,8 +202,8 @@ func main() {
 					Name:  "patch",
 					Usage: "bump the patch version",
 					Action: func(c *cli.Context) error {
-						if err := Bump(prefix, Patch, merged); err != nil {
-							fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+						if err := Bump(prefix, Patch, merged, dryrun); err != nil {
+							log.Printf("Error: %v", err)
 							return err
 						}
 						return nil
@@ -203,8 +213,8 @@ func main() {
 					Name:  "minor",
 					Usage: "bump the minor version",
 					Action: func(c *cli.Context) error {
-						if err := Bump(prefix, Minor, merged); err != nil {
-							fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+						if err := Bump(prefix, Minor, merged, dryrun); err != nil {
+							log.Printf("Error: %v", err)
 							return err
 						}
 						return nil
@@ -214,8 +224,8 @@ func main() {
 					Name:  "major",
 					Usage: "bump the major version",
 					Action: func(c *cli.Context) error {
-						if err := Bump(prefix, Major, merged); err != nil {
-							fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+						if err := Bump(prefix, Major, merged, dryrun); err != nil {
+							log.Printf("Error: %v", err)
 							return err
 						}
 						return nil
@@ -225,8 +235,8 @@ func main() {
 					Name:  "auto",
 					Usage: "bump the version specified in the last commit",
 					Action: func(c *cli.Context) error {
-						if err := Bump(prefix, Auto, merged); err != nil {
-							fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+						if err := Bump(prefix, Auto, merged, dryrun); err != nil {
+							log.Printf("Error: %v", err)
 							return err
 						}
 						return nil
