@@ -163,12 +163,6 @@ func main() {
 			Usage:       "consider tags merged into this branch",
 			Destination: &merged,
 		},
-		&cli.BoolFlag{
-			Name:        "dry-run",
-			Usage:       "do not add a git tag; only report the tag that would be added",
-			Destination: &dryrun,
-			Aliases:     []string{"n"},
-		},
 	}
 
 	actionLatest := func(c *cli.Context) error {
@@ -186,6 +180,14 @@ func main() {
 			Name:    "bump",
 			Aliases: []string{"b"},
 			Usage:   "increment the version and create a new git tag",
+			Flags: []cli.Flag{
+				&cli.BoolFlag{
+					Name:        "dry-run",
+					Usage:       "do not add a git tag; only report the tag that would be added",
+					Destination: &dryrun,
+					Aliases:     []string{"n"},
+				},
+			},
 			Subcommands: []*cli.Command{
 				{
 					Name:  "prerelease",

@@ -23,9 +23,28 @@ COMMANDS:
 GLOBAL OPTIONS:
    --prefix value  set a prefix for the tag name (e.g. v1.0.0)
    --merged        consider tags merged into this branch (default: false)
-   --dry-run, -n   do not add a git tag; only report the tag that would be added (default: false)
    --help, -h      show help (default: false)
    --version, -v   print the version (default: false)
+```
+
+```
+NAME:
+   gitversion bump - increment the version and create a new git tag
+
+USAGE:
+   gitversion bump [command options] [arguments...]
+
+OPTIONS:
+   --dry-run, -n  do not add a git tag; only report the tag that would be added (default: false)
+   
+```
+
+```
+NAME:
+   gitversion show - output the latest tagged version
+
+USAGE:
+   gitversion show [arguments...]
 ```
 
 Only [semver](http://semver.org/)-style versions with optional prefix are
