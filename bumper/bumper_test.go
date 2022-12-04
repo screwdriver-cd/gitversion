@@ -283,7 +283,7 @@ func TestPrefix(t *testing.T) {
 	assert.Equal(t, "2.1.0", latest.String())
 }
 
-func ExampleBump() {
+func ExampleBumper_Bump() {
 	t := &testing.T{}
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
