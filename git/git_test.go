@@ -147,9 +147,10 @@ func TestTagged(t *testing.T) {
 
 func TestTag(t *testing.T) {
 	ctrl := gomock.NewController(t)
+	expected := "v10.10.10"
 	g := gitForTest(ctrl,
-		withGitTagOutput("", "tag", "v10.10.10"),
+		withGitTagOutput("", "tag", expected),
 	)
 
-	require.NoError(t, g.Tag("v10.10.10"))
+	require.NoError(t, g.Tag(expected))
 }
