@@ -2,206 +2,155 @@ package git
 
 import (
 	"fmt"
-	"os"
+	"github.com/golang/mock/gomock"
+	"github.com/screwdriver-cd/gitversion/testutil"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"os/exec"
+	"path/filepath"
+	"strings"
 	"testing"
 )
 
-type execFunc func(command string, args ...string) *exec.Cmd
+type (
+	CmdRunnerOption func(*MockCmdRunner)
+)
 
-func getFakeExecCommand(validator func(string, ...string)) execFunc {
-	return func(command string, args ...string) *exec.Cmd {
-		validator(command, args...)
-		return fakeExecCommand(command, args...)
+var (
+	fakeTags = []string{
+		"v1.0.1",
+		"v2.0.1",
+		"v1.2.1",
+		"v1.4.3",
+	}
+	fakeTagsOutput = strings.Join(fakeTags, "\n") + "\n"
+	fakeHead       = "9d8ceaaa28f0563e52e1edf3eaae72c814aa1102"
+	fakeHeadOutput = fakeHead + "\n"
+)
+
+func mockRunnerForTest(ctrl *gomock.Controller, options ...CmdRunnerOption) *MockCmdRunner {
+	ret := NewMockCmdRunner(ctrl)
+	for _, opt := range options {
+		opt(ret)
+	}
+	return ret
+}
+
+func gitForTest(ctrl *gomock.Controller, options ...CmdRunnerOption) Git {
+	ret := &DefaultGit{
+		CmdRunner: mockRunnerForTest(ctrl, options...),
+	}
+	return ret
+}
+
+func gitCmdMatcher(args ...string) gomock.Matcher {
+	return testutil.NewMatcherFunc(fmt.Sprint(args), func(x interface{}) bool {
+		cmd := x.(*exec.Cmd)
+		if filepath.Base(cmd.Args[0]) != "git" {
+			return false
+		}
+		if len(args)+1 != len(cmd.Args) {
+			return false
+		}
+		for i := range args {
+			if cmd.Args[i+1] != args[i] {
+				return false
+			}
+		}
+		return true
+	})
+}
+
+func withGitTagOutput(output string, args ...string) CmdRunnerOption {
+	return func(runner *MockCmdRunner) {
+		runner.EXPECT().
+			Output(gitCmdMatcher(args...)).
+			Return([]byte(output), nil)
 	}
 }
 
-func fakeExecCommand(command string, args ...string) *exec.Cmd {
-	cs := []string{"-test.run=TestHelperProcess", "--", command}
-	cs = append(cs, args...)
-	cmd := exec.Command(os.Args[0], cs...)
-	cmd.Env = []string{"GO_WANT_HELPER_PROCESS=1"}
-	return cmd
+func withGitRun(args ...string) CmdRunnerOption {
+	return func(runner *MockCmdRunner) {
+		runner.EXPECT().
+			Run(gitCmdMatcher(args...))
+	}
 }
 
 func TestTags(t *testing.T) {
+	ctrl := gomock.NewController(t)
 	expected := []string{
 		"v1.0.1",
 		"v2.0.1",
 		"v1.2.1",
 		"v1.4.3",
 	}
+	g := gitForTest(ctrl, withGitTagOutput(fakeTagsOutput, "tag"))
 
-	execCommand = fakeExecCommand
-	defer func() { execCommand = exec.Command }()
+	tags, err := g.Tags(false)
+	require.NoError(t, err)
 
-	tags, err := Tags(false)
-
-	if err != nil {
-		t.Errorf("Tags() error = %q, should be nil", err)
-	}
-
-	if len(expected) != len(tags) {
-		t.Errorf("len(Tags()) = %v, want %v", len(tags), len(expected))
-	}
+	require.Equal(t, len(expected), len(tags))
 
 	for i, tag := range tags {
-		if expected[i] != tag {
-			t.Errorf("Tags()[%v] = %v, want %v", i, tag, expected[i])
-		}
+		assert.Equalf(t, expected[i], tag, "Tags()[%v] = %v, want %v", i, tag, expected[i])
 	}
 }
 
 func TestLastCommitLong(t *testing.T) {
+	ctrl := gomock.NewController(t)
 	expected := "9d8ceaaa28f0563e52e1edf3eaae72c814aa1102"
-	execCommand = getFakeExecCommand(func(cmd string, args ...string) {
-		if len(args) != 2 {
-			t.Errorf("wrong arguments supplied to git rev-parse: %v", args)
-		}
-	})
-	defer func() { execCommand = exec.Command }()
+	g := gitForTest(ctrl, withGitTagOutput(fakeHeadOutput, "rev-parse", "HEAD"))
 
-	commit, err := LastCommit(false)
+	commit, err := g.LastCommit(false)
+	require.NoError(t, err)
 
-	if err != nil {
-		t.Errorf("LastCommit() error = %q, should be nil", err)
-	}
-
-	if expected != commit {
-		t.Errorf("LastCommit() = %v, want %v", commit, expected)
-	}
+	assert.Equal(t, expected, commit)
 }
 
 func TestLastCommitShort(t *testing.T) {
+	ctrl := gomock.NewController(t)
 	expected := "9d8ceaa"
-	execCommand = getFakeExecCommand(func(cmd string, args ...string) {
-		if len(args) != 3 {
-			t.Errorf("wrong arguments supplied to git rev-parse: %v", args)
-		}
-	})
-	defer func() { execCommand = exec.Command }()
+	g := gitForTest(ctrl, withGitTagOutput(expected+"\n", "rev-parse", "--short", "HEAD"))
 
-	commit, err := LastCommit(true)
-
+	commit, err := g.LastCommit(true)
+	require.NoError(t, err)
 	if err != nil {
 		t.Errorf("LastCommit() error = %q, should be nil", err)
 	}
 
-	if expected != commit {
-		t.Errorf("LastCommit() = %v, want %v", commit, expected)
-	}
+	assert.Equal(t, expected, commit)
 }
 
 func TestLastMessage(t *testing.T) {
+	ctrl := gomock.NewController(t)
 	expected := "minor: this should be bumping minor"
+	g := gitForTest(ctrl, withGitTagOutput(expected+"\n", "log", "-1", "--pretty=%B"))
 
-	execCommand = fakeExecCommand
-	defer func() { execCommand = exec.Command }()
+	commit, err := g.LastCommitMessage()
+	require.NoError(t, err)
 
-	commit, err := LastCommitMessage()
-
-	if err != nil {
-		t.Errorf("LastCommitMessage() error = %q, should be nil", err)
-	}
-
-	if expected != commit {
-		t.Errorf("LastCommitMessage() = %v, want %v", commit, expected)
-	}
+	assert.Equal(t, expected, commit)
 }
 
 func TestTagged(t *testing.T) {
-	expected := true
+	ctrl := gomock.NewController(t)
+	g := gitForTest(ctrl,
+		withGitTagOutput("true\n", "tag", "--contains", fakeHead),
+		withGitTagOutput(fakeHeadOutput, "rev-parse", "HEAD"),
+	)
 
-	execCommand = fakeExecCommand
-	defer func() { execCommand = exec.Command }()
+	commit, err := g.Tagged()
+	require.NoError(t, err)
 
-	commit, err := Tagged()
-
-	if err != nil {
-		t.Errorf("Tagged() error = %q, should be nil", err)
-	}
-
-	if expected != commit {
-		t.Errorf("Tagged() = %v, want %v", commit, expected)
-	}
+	require.True(t, commit)
 }
 
 func TestTag(t *testing.T) {
-	execCommand = getFakeExecCommand(func(cmd string, args ...string) {
-		if len(args) != 2 {
-			t.Errorf("wrong arguments supplied to git tag: %v", args)
-		}
-		want := "v10.10.10"
-		if args[1] != want {
-			t.Errorf("Tag received the wrong tag: %q, want %q", args[1], want)
-		}
-	})
-	defer func() { execCommand = exec.Command }()
+	ctrl := gomock.NewController(t)
+	expected := "v10.10.10"
+	g := gitForTest(ctrl,
+		withGitTagOutput("", "tag", expected),
+	)
 
-	Tag("v10.10.10")
-}
-
-// This is a fake test for mocking out exec calls.
-// See https://golang.org/src/os/exec/exec_test.go and
-// https://npf.io/2015/06/testing-exec-command/ for more info
-func TestHelperProcess(*testing.T) {
-	if os.Getenv("GO_WANT_HELPER_PROCESS") != "1" {
-		return
-	}
-	defer os.Exit(0)
-
-	args := os.Args[:]
-	for i, val := range os.Args { // Should become something lke ["git", "tag"]
-		args = os.Args[i:]
-		if val == "--" {
-			args = args[1:]
-			break
-		}
-	}
-
-	if len(args) >= 2 && args[0] == "git" {
-		switch args[1] {
-		default:
-			os.Exit(255)
-		case "tag":
-			if len(args) == 2 {
-				tags := []string{
-					"v1.0.1",
-					"v2.0.1",
-					"v1.2.1",
-					"v1.4.3",
-				}
-				for _, tag := range tags {
-					fmt.Println(tag)
-				}
-				return
-			}
-
-			// git tag v1.0.0
-			if len(args) == 3 {
-				return
-			}
-
-			// git tag --contains foo
-			if len(args) == 4 {
-				fmt.Println("v1.0.5")
-				return
-			}
-
-			os.Exit(255)
-		case "log":
-			fmt.Println("minor: this should be bumping minor")
-			return
-		case "rev-parse":
-			// git rev-parse HEAD
-			if len(args) == 3 {
-				fmt.Println("9d8ceaaa28f0563e52e1edf3eaae72c814aa1102")
-			} else {
-				fmt.Println("9d8ceaa")
-			}
-			return
-		}
-	}
-
-	os.Exit(255)
+	require.NoError(t, g.Tag(expected))
 }
