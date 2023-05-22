@@ -14,7 +14,10 @@ import (
 // Injectors from wire.go:
 
 func NewBumper() Bumper {
-	defaultGit := &git.DefaultGit{}
+	defaultCmdRunner := &git.DefaultCmdRunner{}
+	defaultGit := &git.DefaultGit{
+		CmdRunner: defaultCmdRunner,
+	}
 	defaultBumper := &DefaultBumper{
 		Git: defaultGit,
 	}
