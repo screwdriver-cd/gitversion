@@ -8,6 +8,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
+	version "github.com/screwdriver-cd/gitversion/version"
 )
 
 // MockBumper is a mock of Bumper interface.
@@ -49,4 +50,34 @@ func (m *MockBumper) Bump(arg0 ...BumpOption) error {
 func (mr *MockBumperMockRecorder) Bump(arg0 ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Bump", reflect.TypeOf((*MockBumper)(nil).Bump), arg0...)
+}
+
+// LatestVersion mocks base method.
+func (m *MockBumper) LatestVersion(prefix string, merged bool) (version.Version, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "LatestVersion", prefix, merged)
+	ret0, _ := ret[0].(version.Version)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// LatestVersion indicates an expected call of LatestVersion.
+func (mr *MockBumperMockRecorder) LatestVersion(prefix, merged interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "LatestVersion", reflect.TypeOf((*MockBumper)(nil).LatestVersion), prefix, merged)
+}
+
+// Versions mocks base method.
+func (m *MockBumper) Versions(prefix string, merged bool) (version.List, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Versions", prefix, merged)
+	ret0, _ := ret[0].(version.List)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Versions indicates an expected call of Versions.
+func (mr *MockBumperMockRecorder) Versions(prefix, merged interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Versions", reflect.TypeOf((*MockBumper)(nil).Versions), prefix, merged)
 }
