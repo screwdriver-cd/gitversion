@@ -5,7 +5,7 @@
 class Gitversion < Formula
   desc "A helper for bumping versions via git tags."
   homepage "https://github.com/screwdriver-cd/gitversion"
-  version "1.1.19"
+  version "1.1.20"
 
   on_macos do
     if Hardware::CPU.intel?
