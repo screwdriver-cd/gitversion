@@ -132,5 +132,5 @@ Code licensed under the BSD 3-Clause license. See LICENSE file for terms.
 - Install gitversion
 
     ```bash
-    brew install gitversion
+    brew install screwdriver-cd/gitversion/gitversion
     ```
