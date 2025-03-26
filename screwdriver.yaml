@@ -11,11 +11,9 @@ jobs:
         steps:
             - path: export PATH=$PATH:$GOPATH/bin
             - modverify: go version; go mod verify
+            - setup: go install tool
             - vet: go vet ./...
             - gofmt: gofmt -l .
-            - test-setup: |
-                go install gotest.tools/gotestsum@latest
-                go install tool
             - lint: |
                 golangci-lint version
                 golangci-lint run ./...
@@ -29,7 +27,6 @@ jobs:
         steps:
             - path: export PATH=$PATH:$GOPATH/bin
             - setup-ci: git clone https://github.com/screwdriver-cd/toolbox.git ci
-            - get: go get -t ./...
             - tag: ./ci/git-tag.sh
             - release: "curl -sL https://git.io/goreleaser | bash"
         secrets:
