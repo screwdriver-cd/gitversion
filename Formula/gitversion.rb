@@ -5,20 +5,20 @@
 class Gitversion < Formula
   desc "A helper for bumping versions via git tags."
   homepage "https://github.com/screwdriver-cd/gitversion"
-  version "1.1.19"
+  version "1.1.26"
 
   on_macos do
     if Hardware::CPU.intel?
-      url "https://github.com/screwdriver-cd/gitversion/releases/download/v1.1.19/gitversion_darwin_amd64"
-      sha256 "c631710de6dd4417765f3d0269310a5e15707fde9f477e5f2c7c9baa6d479f95"
+      url "https://github.com/screwdriver-cd/gitversion/releases/download/v1.1.26/gitversion_darwin_amd64"
+      sha256 "88d98cf9cb1a3da0912a3cdbc52d1cfc636dfa5a4530d7af26b4a0fdf672dfc8"
 
       def install
         bin.install "gitversion_darwin_amd64" => "gitversion"
       end
     end
     if Hardware::CPU.arm?
-      url "https://github.com/screwdriver-cd/gitversion/releases/download/v1.1.19/gitversion_darwin_arm64"
-      sha256 "cc2c2b4fb446cc1f089fd094ff4438c804fe21f626d11a7f20f8d95318c420e2"
+      url "https://github.com/screwdriver-cd/gitversion/releases/download/v1.1.26/gitversion_darwin_arm64"
+      sha256 "e1df5e2f2bc567c238807ea271757280e7082f2d9d399157d70119fe774f29ff"
 
       def install
         bin.install "gitversion_darwin_arm64" => "gitversion"
@@ -28,19 +28,23 @@ class Gitversion < Formula
 
   on_linux do
     if Hardware::CPU.intel?
-      url "https://github.com/screwdriver-cd/gitversion/releases/download/v1.1.19/gitversion_linux_amd64"
-      sha256 "070f14d821939d7910a0587010f7df7b039d252db3184dc7b26dc3bf76504619"
+      if Hardware::CPU.is_64_bit?
+        url "https://github.com/screwdriver-cd/gitversion/releases/download/v1.1.26/gitversion_linux_amd64"
+        sha256 "ec7cb0adc3aff86f34f751fc3f4473d2a5e4060d52ece3d0f08a769d604dc4f1"
 
-      def install
-        bin.install "gitversion_linux_amd64" => "gitversion"
+        def install
+          bin.install "gitversion_linux_amd64" => "gitversion"
+        end
       end
     end
-    if Hardware::CPU.arm? && Hardware::CPU.is_64_bit?
-      url "https://github.com/screwdriver-cd/gitversion/releases/download/v1.1.19/gitversion_linux_arm64"
-      sha256 "04c4885da212c476ece32cbffabba4468a30e40cdf1c0ede65310cedf797d257"
+    if Hardware::CPU.arm?
+      if Hardware::CPU.is_64_bit?
+        url "https://github.com/screwdriver-cd/gitversion/releases/download/v1.1.26/gitversion_linux_arm64"
+        sha256 "9229970faf5583897cd2f74d0eac1989925f689ce0b1f7e734a0dc965d9e39b3"
 
-      def install
-        bin.install "gitversion_linux_arm64" => "gitversion"
+        def install
+          bin.install "gitversion_linux_arm64" => "gitversion"
+        end
       end
     end
   end
