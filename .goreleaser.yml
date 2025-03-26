@@ -5,9 +5,10 @@ brews:
     description: A helper for bumping versions via git tags.
     commit_msg_template: "[skip ci] Brew formula update for {{ .ProjectName }} version {{ .Tag }}"
     repository:
+      branch: master
+      directory: Formula
       name: gitversion
       owner: screwdriver-cd
-      branch: master
     test: |
       system "#{bin}/gitversion", "--version"
 builds:
