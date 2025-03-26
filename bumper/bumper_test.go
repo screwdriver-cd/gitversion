@@ -1,11 +1,12 @@
 package bumper
 
 import (
+	"testing"
+
 	"github.com/golang/mock/gomock"
 	"github.com/screwdriver-cd/gitversion/git"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 type (

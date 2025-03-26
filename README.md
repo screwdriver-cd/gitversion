@@ -106,9 +106,11 @@ For prerelease versions, we automatically use the short git SHA (e.g. `1.2.3-164
 _note: prerelease tags should not be pushed to git, only used for local resolution._
 
 ## Testing
-
+Please ensure that the unit test pass and `golangci-lint` doesn't produce
+any output.
 ```bash
 go test ./...
+go tool golangci-lint run ./...
 ```
 
 ## License
