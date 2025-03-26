@@ -3,12 +3,13 @@ package bumper
 import (
 	"errors"
 	"fmt"
-	"github.com/screwdriver-cd/gitversion/git"
-	"github.com/screwdriver-cd/gitversion/version"
 	"log"
 	"regexp"
 	"sort"
 	"strings"
+
+	"github.com/screwdriver-cd/gitversion/git"
+	"github.com/screwdriver-cd/gitversion/version"
 )
 
 //go:generate go run github.com/golang/mock/mockgen -source $GOFILE -destination mock_$GOFILE -package $GOPACKAGE
