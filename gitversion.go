@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
-	. "github.com/screwdriver-cd/gitversion/bumper"
-	"github.com/urfave/cli/v2"
 	"log"
 	"os"
+
+	"github.com/screwdriver-cd/gitversion/bumper"
+	"github.com/urfave/cli/v2"
 )
 
 // These variables get set by the build script via the LDFLAGS
@@ -38,20 +39,20 @@ func main() {
 		},
 	}
 
-	bumpWithFieldAction := func(field Field) cli.ActionFunc {
+	bumpWithFieldAction := func(field bumper.Field) cli.ActionFunc {
 		return func(context *cli.Context) error {
-			b := NewBumper()
+			b := bumper.NewBumper()
 			return b.Bump(
-				WithPrefix(prefix),
-				WithField(field),
-				WithMerged(merged),
-				WithDryRun(dryrun),
+				bumper.WithPrefix(prefix),
+				bumper.WithField(field),
+				bumper.WithMerged(merged),
+				bumper.WithDryRun(dryrun),
 			)
 		}
 	}
 
 	var latestAction cli.ActionFunc = func(context *cli.Context) error {
-		b := NewBumper()
+		b := bumper.NewBumper()
 		v, err := b.LatestVersion(prefix, merged)
 		if err != nil {
 			log.Printf("Error: %v", err)
@@ -78,27 +79,27 @@ func main() {
 				{
 					Name:   "prerelease",
 					Usage:  "bump the prerelease version",
-					Action: bumpWithFieldAction(FieldPrerelease),
+					Action: bumpWithFieldAction(bumper.FieldPrerelease),
 				},
 				{
 					Name:   "patch",
 					Usage:  "bump the patch version",
-					Action: bumpWithFieldAction(FieldPatch),
+					Action: bumpWithFieldAction(bumper.FieldPatch),
 				},
 				{
 					Name:   "minor",
 					Usage:  "bump the minor version",
-					Action: bumpWithFieldAction(FieldMinor),
+					Action: bumpWithFieldAction(bumper.FieldMinor),
 				},
 				{
 					Name:   "major",
 					Usage:  "bump the major version",
-					Action: bumpWithFieldAction(FieldMajor),
+					Action: bumpWithFieldAction(bumper.FieldMajor),
 				},
 				{
 					Name:   "auto",
 					Usage:  "bump the version specified in the last commit",
-					Action: bumpWithFieldAction(FieldAuto),
+					Action: bumpWithFieldAction(bumper.FieldAuto),
 				},
 			},
 		},

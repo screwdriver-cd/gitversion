@@ -2,14 +2,15 @@ package git
 
 import (
 	"fmt"
-	"github.com/golang/mock/gomock"
-	"github.com/screwdriver-cd/gitversion/testutil"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/golang/mock/gomock"
+	"github.com/screwdriver-cd/gitversion/testutil"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 type (
@@ -66,13 +67,6 @@ func withGitTagOutput(output string, args ...string) CmdRunnerOption {
 		runner.EXPECT().
 			Output(gitCmdMatcher(args...)).
 			Return([]byte(output), nil)
-	}
-}
-
-func withGitRun(args ...string) CmdRunnerOption {
-	return func(runner *MockCmdRunner) {
-		runner.EXPECT().
-			Run(gitCmdMatcher(args...))
 	}
 }
 

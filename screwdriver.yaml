@@ -13,6 +13,9 @@ jobs:
             - modverify: go version; go mod verify
             - vet: go vet ./...
             - gofmt: gofmt -l .
+            - lint: |
+                go tool golangci-lint version
+                go tool golangci-lint run ./...
             - test-setup: go install gotest.tools/gotestsum@latest
             - test: gotestsum --format testname --jsonfile ${SD_ARTIFACTS_DIR}/report.json -- -coverprofile=${SD_ARTIFACTS_DIR}/coverage.out ./...
             # Ensure we can compile
