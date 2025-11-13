@@ -1,6 +1,6 @@
 module github.com/screwdriver-cd/gitversion
 
-go 1.24.2
+go 1.25
 
 require (
 	github.com/abice/go-enum v0.6.1
