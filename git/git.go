@@ -18,7 +18,7 @@ type (
 	Git interface {
 		LastCommit(short bool) (string, error)
 		LastCommitMessage() (string, error)
-		Tag(tag string) error
+		Tag(tag string, annotate bool) error
 		Tags(merged bool) ([]string, error)
 		Tagged() (bool, error)
 	}
@@ -50,8 +50,14 @@ func (g *DefaultGit) Tags(merged bool) ([]string, error) {
 }
 
 // Tag calls git to create a new tag from a string
-func (g *DefaultGit) Tag(tag string) error {
-	cmd := exec.Command("git", "tag", tag)
+func (g *DefaultGit) Tag(tag string, annotate bool) error {
+	args := []string{"tag"}
+	if annotate {
+		args = append(args, "-a")
+	}
+	args = append(args, tag)
+
+	cmd := exec.Command("git", args...)
 	_, err := g.CmdRunner.Output(cmd)
 	if err != nil {
 		return fmt.Errorf("tagging the commit in git: %w", err)

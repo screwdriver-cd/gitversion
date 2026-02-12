@@ -16,10 +16,11 @@ import (
 
 type (
 	bumpOptions struct {
-		prefix string
-		field  Field
-		merged bool
-		dryrun bool
+		prefix   string
+		field    Field
+		merged   bool
+		dryrun   bool
+		annotate bool
 	}
 	BumpOption func(*bumpOptions)
 
@@ -78,6 +79,12 @@ func WithMerged(merged bool) BumpOption {
 func WithDryRun(dryrun bool) BumpOption {
 	return func(options *bumpOptions) {
 		options.dryrun = dryrun
+	}
+}
+
+func WithAnnotate(annotate bool) BumpOption {
+	return func(options *bumpOptions) {
+		options.annotate = annotate
 	}
 }
 
@@ -148,7 +155,7 @@ func (d *DefaultBumper) Bump(options ...BumpOption) error {
 	newTag := fmt.Sprintf("%s%s", opts.prefix, v)
 	if opts.dryrun {
 		log.Print("Dryrun; not git tagging")
-	} else if err = d.Git.Tag(newTag); err != nil {
+	} else if err = d.Git.Tag(newTag, opts.annotate); err != nil {
 		return fmt.Errorf("creating new tag %v: %w", v, err)
 	}
 

@@ -57,7 +57,7 @@ func withEmptyGitTags() MockGitOption {
 func withExpectedTag(tag string) MockGitOption {
 	return func(mockGit *git.MockGit) {
 		mockGit.EXPECT().
-			Tag(gomock.Eq(tag))
+			Tag(gomock.Eq(tag), false)
 	}
 }
 

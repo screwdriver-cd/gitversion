@@ -19,7 +19,7 @@ var (
 
 func main() {
 	var prefix string
-	var merged, dryrun bool
+	var merged, dryrun, annotate bool
 
 	app := cli.NewApp()
 	app.Name = "gitversion"
@@ -47,6 +47,7 @@ func main() {
 				bumper.WithField(field),
 				bumper.WithMerged(merged),
 				bumper.WithDryRun(dryrun),
+				bumper.WithAnnotate(annotate),
 			)
 		}
 	}
@@ -73,6 +74,12 @@ func main() {
 					Usage:       "do not add a git tag; only report the tag that would be added",
 					Destination: &dryrun,
 					Aliases:     []string{"n"},
+				},
+				&cli.BoolFlag{
+					Name:        "annotate",
+					Usage:       "create an annotated tag instead of a lightweight tag",
+					Destination: &annotate,
+					Aliases:     []string{"a"},
 				},
 			},
 			Subcommands: []*cli.Command{

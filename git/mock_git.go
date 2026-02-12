@@ -117,17 +117,17 @@ func (mr *MockGitMockRecorder) LastCommitMessage() *gomock.Call {
 }
 
 // Tag mocks base method.
-func (m *MockGit) Tag(tag string) error {
+func (m *MockGit) Tag(tag string, annotate bool) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Tag", tag)
+	ret := m.ctrl.Call(m, "Tag", tag, annotate)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Tag indicates an expected call of Tag.
-func (mr *MockGitMockRecorder) Tag(tag interface{}) *gomock.Call {
+func (mr *MockGitMockRecorder) Tag(tag interface{}, annotate interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Tag", reflect.TypeOf((*MockGit)(nil).Tag), tag)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Tag", reflect.TypeOf((*MockGit)(nil).Tag), tag, annotate)
 }
 
 // Tagged mocks base method.

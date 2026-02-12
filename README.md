@@ -35,8 +35,8 @@ USAGE:
    gitversion bump [command options] [arguments...]
 
 OPTIONS:
-   --dry-run, -n  do not add a git tag; only report the tag that would be added (default: false)
-   
+   --dry-run, -n    do not add a git tag; only report the tag that would be added (default: false)
+   --annotate, -a   create an annotated tag instead of a lightweight tag (default: false)
 ```
 
 ```
