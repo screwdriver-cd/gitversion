@@ -146,5 +146,15 @@ func TestTag(t *testing.T) {
 		withGitTagOutput("", "tag", expected),
 	)
 
-	require.NoError(t, g.Tag(expected))
+	require.NoError(t, g.Tag(expected, false))
+}
+
+func TestTagAnnotated(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	expected := "v10.10.10"
+	g := gitForTest(ctrl,
+		withGitTagOutput("", "tag", "-a", expected),
+	)
+
+	require.NoError(t, g.Tag(expected, true))
 }
