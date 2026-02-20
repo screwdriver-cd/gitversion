@@ -53,7 +53,7 @@ func (g *DefaultGit) Tags(merged bool) ([]string, error) {
 func (g *DefaultGit) Tag(tag string, annotate bool) error {
 	args := []string{"tag"}
 	if annotate {
-		args = append(args, "-a")
+		args = append(args, "-a", "-m", tag)
 	}
 	args = append(args, tag)
 
